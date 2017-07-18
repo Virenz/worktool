@@ -12,7 +12,7 @@ int InitTreeControl();
 
 HINSTANCE hgInst;
 HWND m_tree;
-TV_ITEM tvi;
+TV_ITEM tvi = {0};
 HTREEITEM Selected;
 SophosParse* sophosParse;
 
@@ -62,6 +62,27 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 				// if code == NM_CLICK - Single click on an item
 				if (((LPNMHDR)lParam)->code == NM_RCLICK)
 				{
+					/*DWORD dwPos = GetMessagePos(); 
+					POINT pt; 
+					pt.x = LOWORD(dwPos); 
+					pt.y = HIWORD(dwPos);
+					ScreenToClient(m_tree, &pt);
+					
+					TVHITTESTINFO ht = { 0 }; 
+					ht.pt = pt;
+					ht.flags = TVHT_ONITEM; 
+					HTREEITEM hItem = TreeView_HitTest(m_tree, &ht);
+
+					TVITEM ti = { 0 }; 
+					TCHAR buf[256] = { 0 };
+					ti.mask = TVIF_HANDLE | TVIF_TEXT; 
+					ti.cchTextMax = 256; 
+					ti.pszText = buf; 
+					ti.hItem = hItem;
+					TreeView_GetItem(m_tree, &ti); 
+					MessageBox(m_tree, buf, NULL, 0);*/
+				
+					tvi = { 0 };
 					memset(&tvi, 0, sizeof(tvi));
 					Selected = (HTREEITEM)SendDlgItemMessage(hDlg,
 						IDC_DATASHOW, TVM_GETNEXTITEM, TVGN_CARET, (LPARAM)Selected);
@@ -76,6 +97,10 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 					SendDlgItemMessage(hDlg, IDC_DATASHOW,
 						TVM_SELECTITEM, TVGN_CARET, (LPARAM)Selected);
 				
+					TCHAR buf[256] = { 0 };
+					tvi.mask = TVIF_HANDLE | TVIF_TEXT;
+					tvi.cchTextMax = 256;
+					tvi.pszText = buf;
 					tvi.hItem = Selected;
 
 					if (SendDlgItemMessage(hDlg, IDC_DATASHOW, TVM_GETITEM, TVGN_CARET, (LPARAM)&tvi))
@@ -141,7 +166,7 @@ int InitTreeControl()
 		insert.hInsertAfter = TVI_LAST;
 		insert.item = item;
 
-		HTREEITEM root1 = TreeView_InsertItem(m_tree, &insert);
+		Selected = TreeView_InsertItem(m_tree, &insert);
 		for (std::multimap<std::string, std::string>::iterator iter = sp->getJsonsInfo().begin(); iter != sp->getJsonsInfo().end(); ++iter) //遍历json成员
 		{
 			std::string str;
@@ -156,7 +181,7 @@ int InitTreeControl()
 			item1.pszText = wszUtf8;
 
 			TV_INSERTSTRUCT insert1;
-			insert1.hParent = root1;
+			insert1.hParent = Selected;
 			insert1.hInsertAfter = TVI_LAST;
 			insert1.item = item1;
 
