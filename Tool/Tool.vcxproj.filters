@@ -19,6 +19,12 @@
     <Filter Include="源文件\jsoncpp">
       <UniqueIdentifier>{aef1aa7c-15f2-46e3-9b49-72b3276217e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\sophos">
+      <UniqueIdentifier>{15567006-f4f8-4fe0-8e0c-678f38d39180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\sophos">
+      <UniqueIdentifier>{1f4feec8-ee1a-4812-be51-5c7f0ba10316}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -32,6 +38,12 @@
     </ClCompile>
     <ClCompile Include="include\json_writer.cpp">
       <Filter>源文件\jsoncpp</Filter>
+    </ClCompile>
+    <ClCompile Include="sophosinfo.cpp">
+      <Filter>源文件\sophos</Filter>
+    </ClCompile>
+    <ClCompile Include="sophosparse.cpp">
+      <Filter>源文件\sophos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +76,12 @@
     </ClInclude>
     <ClInclude Include="include\json\writer.h">
       <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="sophosinfo.h">
+      <Filter>头文件\sophos</Filter>
+    </ClInclude>
+    <ClInclude Include="sophosparse.h">
+      <Filter>头文件\sophos</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

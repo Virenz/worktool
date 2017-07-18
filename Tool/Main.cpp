@@ -1,20 +1,18 @@
-﻿#include "FileFunction.h"
+﻿#include <Windows.h>
 #include "resource.h"
-
-#include "include\json\json.h"
-#include <map>
 #include <commctrl.h>
+
+#include "sophosparse.h"
+#include "FileFunction.h"
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
-int ReadJsonFromFile(LPWSTR filename);
 int InitTreeControl();
-
-std::multimap<std::string, std::string> jsonsmap;
 
 HINSTANCE hgInst;
 HWND m_tree;
+SophosParse* sophosParse;
 
 int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nShow)
 {
@@ -78,81 +76,60 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 			SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
 		}
 
-		ReadJsonFromFile(ofn.lpstrFile);
+		char* filedata = (char*)getFileInfo(ofn.lpstrFile);
+		sophosParse = new SophosParse();
+		sophosParse->readandparseJsonFromFile(filedata);
+
+		UnmapViewOfFile(filedata);
+
 		m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
 		InitTreeControl();
 	}
 }
 
-int ReadJsonFromFile(LPWSTR filename)
-{
-	Json::Reader reader;// 解析json用Json::Reader   
-	Json::Value root; // Json::Value是一种很重要的类型，可以代表任意类型。如int, string, object, array         
-
-	char* data = (CHAR*)getFileInfo(filename);
-	//const char* str = "{\'AXML_BasicReceivers\': [\'com/mgb/safe/receiver/BootReceiver\'], \'AXML_BasicServices\' : [\'com/mgb/safe/service/ResidentService\', \'com/mgb/safe/service/CoreService\']}";
-		//"{\"AXML_BasicReceivers\": [\"com/mgb/safe/receiver/BootReceiver\"], \"AXML_BasicServices\" : [\"com/mgb/safe/service/ResidentService\", \"com/mgb/safe/service/CoreService\"]}";
-
-	// 进行切割
-	const char *d = "\r\n";
-	char *dataLine;
-	char *buff;
-	dataLine = strtok_s(data, d, &buff);
-	while (dataLine)
-	{
-		if (reader.parse(dataLine, root, FALSE))
-		{
-			Json::Value::Members arrayMember = root.getMemberNames(); //ayyayMember是成员名称的集合，即name,age;
-			for (Json::Value::Members::iterator iter = arrayMember.begin(); iter != arrayMember.end(); ++iter) //遍历json成员
-			{
-				Json::Value valueList = root.get(*iter, "null");
-				int file_size = valueList.size();  // 得到"files"的数组个数 
-				for (size_t i = 0; i < file_size; i++)
-				{
-					jsonsmap.insert(std::pair<std::string, std::string>(*iter, valueList[i].asString()));
-				}
-			}
-		}
-		else
-		{
-
-		}
-		dataLine = strtok_s(NULL, d, &buff);
-	}
-
-	return 0;
-}
-
 int InitTreeControl()
 {
-	TV_ITEM item;
-	item.mask = TVIF_TEXT | TVIF_PARAM;
-	item.cchTextMax = 2;
-	item.pszText = L"1";
-
-	TV_INSERTSTRUCT insert;
-	insert.hParent = TVI_ROOT;
-	insert.hInsertAfter = TVI_LAST;
-	insert.item = item;
-
-	HTREEITEM root1 = TreeView_InsertItem(m_tree, &insert);
-	for (std::multimap<std::string, std::string>::iterator iter = jsonsmap.begin(); iter != jsonsmap.end(); ++iter) //遍历json成员
+	std::vector<SophosInfo*>& sophosInfos = sophosParse->getSophosInfos();
+	for (SophosInfo* sp : sophosInfos)
 	{
-		//wchar_t treeStr[20];
-		//swprintf(treeStr, "%s : %s", (*iter).first, (*iter).second);
-		TV_ITEM item1;
-		item1.mask = TVIF_TEXT | TVIF_PARAM | TVS_HASLINES | TVS_LINESATROOT;
-		item1.cchTextMax = 2;
-		item1.pszText = L"TEST";
+		TV_ITEM item;
+		item.mask = TVIF_TEXT | TVIF_PARAM;
+		item.cchTextMax = 2;
+		item.pszText = StringToWchar_t(sp->getVirusName());
 
-		TV_INSERTSTRUCT insert1;
-		insert1.hParent = root1;
-		insert1.hInsertAfter = TVI_LAST;
-		insert1.item = item1;
+		TV_INSERTSTRUCT insert;
+		insert.hParent = TVI_ROOT;
+		insert.hInsertAfter = TVI_LAST;
+		insert.item = item;
 
-		HTREEITEM root2 = TreeView_InsertItem(m_tree, &insert1);
+		HTREEITEM root1 = TreeView_InsertItem(m_tree, &insert);
+		for (std::multimap<std::string, std::string>::iterator iter = sp->getJsonsInfo().begin(); iter != sp->getJsonsInfo().end(); ++iter) //遍历json成员
+		{
+			std::string str;
+			str.append(iter->first);
+			str.append(" : ");
+			str.append(iter->second);
+			wchar_t * wszUtf8 = StringToWchar_t(str);
+
+			TV_ITEM item1;
+			item1.mask = TVIF_TEXT | TVIF_PARAM | TVS_HASLINES | TVS_LINESATROOT;
+			item1.cchTextMax = 2;
+			item1.pszText = wszUtf8;
+
+			TV_INSERTSTRUCT insert1;
+			insert1.hParent = root1;
+			insert1.hInsertAfter = TVI_LAST;
+			insert1.item = item1;
+
+			HTREEITEM root2 = TreeView_InsertItem(m_tree, &insert1);
+
+			delete[] wszUtf8;
+		}
+
 	}
-
+	sophosInfos.clear();
+	delete sophosParse;
 
 	return 0;
 }
+

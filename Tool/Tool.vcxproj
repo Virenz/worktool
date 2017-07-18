@@ -150,6 +150,8 @@
     <ClCompile Include="include\json_value.cpp" />
     <ClCompile Include="include\json_writer.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="sophosinfo.cpp" />
+    <ClCompile Include="sophosparse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileFunction.h" />
@@ -162,6 +164,8 @@
     <ClInclude Include="include\json\value.h" />
     <ClInclude Include="include\json\writer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="sophosinfo.h" />
+    <ClInclude Include="sophosparse.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tool.rc" />
