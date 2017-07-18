@@ -73,17 +73,22 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 		myFileDialogConfig(ofn, hwnd);
 		if (GetOpenFileName(&ofn))
 		{
-			SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
+			if (ofn.lpstrFile != NULL)
+			{
+				SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
+
+				char* filedata = (char*)getFileInfo(ofn.lpstrFile);
+				sophosParse = new SophosParse();
+				sophosParse->readandparseJsonFromFile(filedata);
+
+				UnmapViewOfFile(filedata);
+
+				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+				InitTreeControl();
+			}
 		}
 
-		char* filedata = (char*)getFileInfo(ofn.lpstrFile);
-		sophosParse = new SophosParse();
-		sophosParse->readandparseJsonFromFile(filedata);
-
-		UnmapViewOfFile(filedata);
-
-		m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-		InitTreeControl();
+		
 	}
 }
 
