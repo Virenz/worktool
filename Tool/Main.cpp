@@ -12,6 +12,8 @@ int InitTreeControl();
 
 HINSTANCE hgInst;
 HWND m_tree;
+TV_ITEM tvi;
+HTREEITEM Selected;
 SophosParse* sophosParse;
 
 int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nShow)
@@ -51,9 +53,41 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
 			Dlg_OnCommand(hDlg, IDOK, GetDlgItem(hDlg, IDOK), BN_CLICKED);
+		break;
+	case WM_NOTIFY:
+		{
+			switch (LOWORD(wParam))
+			{
+			case IDC_DATASHOW:
+				// if code == NM_CLICK - Single click on an item
+				if (((LPNMHDR)lParam)->code == NM_RCLICK)
+				{
+					memset(&tvi, 0, sizeof(tvi));
+					Selected = (HTREEITEM)SendDlgItemMessage(hDlg,
+						IDC_DATASHOW, TVM_GETNEXTITEM, TVGN_CARET, (LPARAM)Selected);
 
+					if (Selected == NULL)
+					{
+						MessageBox(hDlg, L"No Items in TreeView",
+							L"Error", MB_OK | MB_ICONINFORMATION);
+						break;
+					}
+					TreeView_EnsureVisible(hDlg, Selected);
+					SendDlgItemMessage(hDlg, IDC_DATASHOW,
+						TVM_SELECTITEM, TVGN_CARET, (LPARAM)Selected);
+				
+					tvi.hItem = Selected;
+
+					if (SendDlgItemMessage(hDlg, IDC_DATASHOW, TVM_GETITEM, TVGN_CARET, (LPARAM)&tvi))
+					{
+						MessageBox(hDlg, tvi.pszText,
+						L"Example", MB_OK | MB_ICONINFORMATION);	
+					}
+				}
+			}
+		}
+		break;
 	}
-
 	return (INT_PTR)FALSE;
 }
 
