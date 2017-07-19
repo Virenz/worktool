@@ -1,4 +1,5 @@
 ﻿#include <Windows.h>
+#include <windowsx.h>
 #include "resource.h"
 #include <commctrl.h>
 
@@ -13,6 +14,7 @@ int InitTreeControl();
 HINSTANCE hgInst;
 HWND m_tree;
 TV_ITEM tvi = {0};
+TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
 SophosParse* sophosParse;
 
@@ -51,8 +53,15 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK)
+		switch (LOWORD(wParam))
+		{
+		case IDOK:
 			Dlg_OnCommand(hDlg, IDOK, GetDlgItem(hDlg, IDOK), BN_CLICKED);
+			break;
+		case ID_COPY_COPY:
+			Dlg_OnCommand(hDlg, ID_COPY_COPY, GetDlgItem(m_tree, ID_COPY_COPY), BN_CLICKED);
+			break;
+		}
 		break;
 	case WM_NOTIFY:
 		{
@@ -97,7 +106,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 					SendDlgItemMessage(hDlg, IDC_DATASHOW,
 						TVM_SELECTITEM, TVGN_CARET, (LPARAM)Selected);
 				
-					TCHAR buf[256] = { 0 };
+					
 					tvi.mask = TVIF_HANDLE | TVIF_TEXT;
 					tvi.cchTextMax = 256;
 					tvi.pszText = buf;
@@ -105,8 +114,42 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 
 					if (SendDlgItemMessage(hDlg, IDC_DATASHOW, TVM_GETITEM, TVGN_CARET, (LPARAM)&tvi))
 					{
-						MessageBox(hDlg, tvi.pszText,
-						L"Example", MB_OK | MB_ICONINFORMATION);	
+						/*MessageBox(hDlg, tvi.pszText,
+						L"Example", MB_OK | MB_ICONINFORMATION);	*/
+					}
+
+					RECT rect;
+					POINT pt;
+					// 获取鼠标右击是的坐标     
+					DWORD dwPos = GetMessagePos();
+					pt.x = LOWORD(dwPos);
+					pt.y = HIWORD(dwPos);
+					//获取客户区域大小     
+					GetClientRect(m_tree, &rect);
+					//把屏幕坐标转为客户区坐标     
+					ScreenToClient(m_tree, &pt);
+					//判断点是否位于客户区域内     
+					if (PtInRect(&rect, pt))
+					{
+						//加载菜单资源     
+						HMENU hroot = LoadMenu((HINSTANCE)GetWindowLongPtr(m_tree, GWLP_HINSTANCE), MAKEINTRESOURCE(IDR_MENU1));
+						if (hroot)
+						{
+							// 获取第一个弹出菜单     
+							HMENU hpop = GetSubMenu(hroot, 0);
+							// 把客户区坐标还原为屏幕坐标     
+							ClientToScreen(m_tree, &pt);
+							//显示快捷菜单     
+							TrackPopupMenu(hpop,
+								TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+								pt.x,
+								pt.y,
+								0,
+								hDlg,
+								NULL);
+							// 用完后要销毁菜单资源     
+							DestroyMenu(hroot);
+						}
 					}
 				}
 			}
@@ -123,6 +166,25 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 	case IDCANCEL:
 		EndDialog(hwnd, id);
 		break;
+
+	case ID_COPY_COPY:
+	{
+		//复制内容     
+		//打开剪贴板     
+		OpenClipboard(NULL);
+		//清空剪贴板     
+		EmptyClipboard();
+
+		//分配内存     
+		HGLOBAL hgl = GlobalAlloc(GMEM_MOVEABLE, 256 * sizeof(WCHAR));
+		LPWSTR lpstrcpy = (LPWSTR)GlobalLock(hgl);
+		memcpy(lpstrcpy, buf, 256 * sizeof(WCHAR));
+		GlobalUnlock(hgl);
+		SetClipboardData(CF_UNICODETEXT, lpstrcpy);
+		//关闭剪贴板     
+		CloseClipboard();
+		break;
+	}
 
 	case IDOK:
 
@@ -147,7 +209,7 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 			}
 		}
 
-		
+		break;
 	}
 }
 
