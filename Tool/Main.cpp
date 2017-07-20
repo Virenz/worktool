@@ -35,6 +35,7 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+
 	return 0;
 }
 

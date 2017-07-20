@@ -682,15 +682,41 @@ Reader::decodeString( Token &token, std::string &decoded )
          Char escape = *current++;
          switch ( escape )
          {
-         case '"': decoded += '"'; break;
-		 case '\'': decoded += '\''; break;
+         case '"': 
+			{
+				decoded += c;
+				decoded += '\"';
+			 }
+			 break; 
+		 case '\'':
+			{
+				decoded += c;
+				decoded += '\'';
+			 }
+			break;
          case '/': decoded += '/'; break;
-         case '\\': decoded += '\\'; break;
+         case '\\': 
+			{
+			 decoded += c;
+			 decoded += '\\\\';
+			 }
+			break;
          case 'b': decoded += '\b'; break;
          case 'f': decoded += '\f'; break;
-         case 'n': decoded += '\n'; break;
+         case 'n': 
+			{
+				 decoded += c;
+				 decoded += '\\n';
+			 }
+			 break;
          case 'r': decoded += '\r'; break;
          case 't': decoded += '\t'; break;
+		 case 'x': 
+			{
+			 decoded += c;
+			 decoded += '\\x';
+			 }
+			 break;
          case 'u':
             {
                unsigned int unicode;
