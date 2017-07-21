@@ -25,6 +25,9 @@
     <Filter Include="源文件\sophos">
       <UniqueIdentifier>{1f4feec8-ee1a-4812-be51-5c7f0ba10316}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\libcurl">
+      <UniqueIdentifier>{c519b6ab-2fcf-4115-a1e1-684d05a97e6b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -39,10 +42,10 @@
     <ClCompile Include="include\json_writer.cpp">
       <Filter>源文件\jsoncpp</Filter>
     </ClCompile>
-    <ClCompile Include="sophosinfo.cpp">
+    <ClCompile Include="sophos\sophosinfo.cpp">
       <Filter>源文件\sophos</Filter>
     </ClCompile>
-    <ClCompile Include="sophosparse.cpp">
+    <ClCompile Include="sophos\sophosparse.cpp">
       <Filter>源文件\sophos</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,10 +80,40 @@
     <ClInclude Include="include\json\writer.h">
       <Filter>头文件\json</Filter>
     </ClInclude>
-    <ClInclude Include="sophosinfo.h">
+    <ClInclude Include="include\curl\curl.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\curlbuild.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\curlrules.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\curlver.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\easy.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\mprintf.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\multi.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\stdcheaders.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\system.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curl\typecheck-gcc.h">
+      <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="sophos\sophosinfo.h">
       <Filter>头文件\sophos</Filter>
     </ClInclude>
-    <ClInclude Include="sophosparse.h">
+    <ClInclude Include="sophos\sophosparse.h">
       <Filter>头文件\sophos</Filter>
     </ClInclude>
   </ItemGroup>

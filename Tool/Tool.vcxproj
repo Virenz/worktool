@@ -152,11 +152,21 @@
     <ClCompile Include="include\json_value.cpp" />
     <ClCompile Include="include\json_writer.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="sophosinfo.cpp" />
-    <ClCompile Include="sophosparse.cpp" />
+    <ClCompile Include="sophos\sophosinfo.cpp" />
+    <ClCompile Include="sophos\sophosparse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileFunction.h" />
+    <ClInclude Include="include\curl\curl.h" />
+    <ClInclude Include="include\curl\curlbuild.h" />
+    <ClInclude Include="include\curl\curlrules.h" />
+    <ClInclude Include="include\curl\curlver.h" />
+    <ClInclude Include="include\curl\easy.h" />
+    <ClInclude Include="include\curl\mprintf.h" />
+    <ClInclude Include="include\curl\multi.h" />
+    <ClInclude Include="include\curl\stdcheaders.h" />
+    <ClInclude Include="include\curl\system.h" />
+    <ClInclude Include="include\curl\typecheck-gcc.h" />
     <ClInclude Include="include\json\autolink.h" />
     <ClInclude Include="include\json\config.h" />
     <ClInclude Include="include\json\features.h" />
@@ -166,8 +176,8 @@
     <ClInclude Include="include\json\value.h" />
     <ClInclude Include="include\json\writer.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="sophosinfo.h" />
-    <ClInclude Include="sophosparse.h" />
+    <ClInclude Include="sophos\sophosinfo.h" />
+    <ClInclude Include="sophos\sophosparse.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tool.rc" />

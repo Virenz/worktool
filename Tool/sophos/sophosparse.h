@@ -1,6 +1,6 @@
 #pragma once
 #include "sophosinfo.h"
-#include "include\json\json.h"
+#include "..\include\json\json.h"
 #include <string>
 #include <vector>
 

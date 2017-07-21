@@ -3,7 +3,7 @@
 #include "resource.h"
 #include <commctrl.h>
 
-#include "sophosparse.h"
+#include "sophos\sophosparse.h"
 #include "FileFunction.h"
 
 #include "include\curl\curl.h"
@@ -278,8 +278,8 @@ void getVirustotalJson(HWND hDlg)
 	struct curl_slist *headerlist = NULL;
 	static const char header_buf[] = "Expect:";
 	long http_response_code = 0;
-
-	TCHAR data[1024] = {0};
+	CHAR *data = (CHAR*)malloc(600);
+	memset(data, 0, 600);
 
 	curl_global_init(CURL_GLOBAL_ALL);
 
@@ -287,14 +287,14 @@ void getVirustotalJson(HWND hDlg)
 	curl_formadd(&formpost,
 		&lastptr,
 		CURLFORM_COPYNAME, "file",
-		CURLFORM_FILE, "D:\\83fba62fbb414fa09c2110e2b426501e1859a046.apk",
+		CURLFORM_FILE, "83fba62fbb414fa09c2110e2b426501e1859a046.apk",
 		CURLFORM_END);
 
 	/* Fill in the filename field */
 	curl_formadd(&formpost,
 		&lastptr,
 		CURLFORM_COPYNAME, "filename",
-		CURLFORM_COPYCONTENTS, "D:\\83fba62fbb414fa09c2110e2b426501e1859a046.apk",
+		CURLFORM_COPYCONTENTS, "83fba62fbb414fa09c2110e2b426501e1859a046.apk",
 		CURLFORM_END);
 
 	/* Fill in the submit field too, even if this is rarely needed */
@@ -315,11 +315,8 @@ void getVirustotalJson(HWND hDlg)
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header_buf);
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
-
-
-		//写入到文件
+		//通过write_data方法将联网返回数据写入到data中
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-		//curl_easy_setopt(curl, CURLOPT_WRITEDATA, pagefile);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
 
 		/* Perform the request, res will get the return code */
@@ -333,7 +330,7 @@ void getVirustotalJson(HWND hDlg)
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response_code);
 			if (http_response_code == 200) 
 			{
-				MessageBox(hDlg, data, L"Example", MB_OK | MB_ICONINFORMATION);
+				MessageBox(hDlg, StringToWchar_t(data), L"Example", MB_OK | MB_ICONINFORMATION);
 			}
 		}
 		/* always cleanup */
@@ -349,8 +346,14 @@ void getVirustotalJson(HWND hDlg)
 size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
 	size_t bytes = size * nmemb;  // total amount of data.
-	TCHAR* page_hand = (TCHAR*)stream;
-	
+	CHAR* page_hand = (CHAR*)stream;
+	stream = (CHAR*)realloc(page_hand, bytes);
+	if (!page_hand)
+	{
+		return size * nmemb;
+	}
 	memcpy(page_hand, ptr, bytes);
+	page_hand[bytes] = 0;
+
 	return size * nmemb;
 }
