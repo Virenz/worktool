@@ -116,7 +116,8 @@ namespace Json {
       bool readComment();
       bool readCStyleComment();
       bool readCppStyleComment();
-      bool readString();
+      bool readDoubleString();
+	  bool readSingleString();
       void readNumber();
       bool readValue();
       bool readObject( Token &token );

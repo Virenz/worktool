@@ -206,6 +206,7 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 				UnmapViewOfFile(filedata);
 
 				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+				TreeView_DeleteAllItems(m_tree);
 				InitTreeControl();
 			}
 		}

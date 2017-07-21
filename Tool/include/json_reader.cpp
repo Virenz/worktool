@@ -297,11 +297,11 @@ Reader::readToken( Token &token )
       break;
    case '"':
       token.type_ = tokenStringDouble;
-      ok = readString();
+      ok = readDoubleString();
       break;
    case '\'':
 	   token.type_ = tokenStringSingle;
-	   ok = readString();
+	   ok = readSingleString();
 	   break;
    case '/':
       token.type_ = tokenComment;
@@ -469,7 +469,7 @@ Reader::readNumber()
 }
 
 bool
-Reader::readString()
+Reader::readDoubleString()
 {
    Char c = 0;
    while ( current_ != end_ )
@@ -477,11 +477,27 @@ Reader::readString()
       c = getNextChar();
 	  if (c == '\\')
 		  getNextChar();
-	  else if (c == '"' || c == '\'')
+	  else if (c == '"')
 		  break;
    }
-   return c == '"' || c == '\'';
+   return c == '"';
 }
+
+bool
+Reader::readSingleString()
+{
+	Char c = 0;
+	while (current_ != end_)
+	{
+		c = getNextChar();
+		if (c == '\\')
+			getNextChar();
+		else if (c == '\'')
+			break;
+	}
+	return c == '\'';
+}
+
 
 
 bool 
@@ -671,9 +687,9 @@ Reader::decodeString( Token &token, std::string &decoded )
    while ( current != end )
    {
       Char c = *current++;
-	  if (c == '"')
+	  if (c == '"'&& token.type_ == tokenStringDouble)
 		  break;
-	  else if (c == '\'')
+	  else if (c == '\'' && token.type_ == tokenStringSingle)
 		  break;
       else if ( c == '\\' )
       {
