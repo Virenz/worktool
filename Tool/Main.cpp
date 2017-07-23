@@ -6,13 +6,12 @@
 #include "sophos\sophosparse.h"
 #include "FileFunction.h"
 
-#include "include\curl\curl.h"
-#pragma comment(lib, "libcurl.lib") 
+#include "vthttp\vtapi.h"
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
-void getVirustotalJson(HWND hDlg);
-size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);
+// 实现文件拖动进入TEXT框
+VOID OnDropFiles(HWND hwnd, HDROP hDropInfo);
 
 int InitTreeControl();
 
@@ -28,13 +27,12 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 	hgInst = hThisApp;
 	//DialogBox(hgInst, MAKEINTRESOURCE(IDD_MY), NULL, DlgProc);
 	HWND hdlg = CreateDialog(hThisApp, MAKEINTRESOURCE(IDD_DIALOG1), GetDesktopWindow(), (DLGPROC)DlgProc);
+	DragAcceptFiles(hdlg,TRUE);
 	if (!hdlg)
 	{
 		return 0;
 	}
 	ShowWindow(hdlg, SW_SHOW);
-
-	getVirustotalJson(hdlg);
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -163,6 +161,9 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
+	case WM_DROPFILES:
+		OnDropFiles(hDlg, (HDROP)wParam);
+		return 0;
 	}
 	return (INT_PTR)FALSE;
 }
@@ -176,49 +177,61 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 		break;
 
 	case ID_COPY_COPY:
-	{
-		//复制内容     
-		//打开剪贴板     
-		OpenClipboard(NULL);
-		//清空剪贴板     
-		EmptyClipboard();
-
-		//分配内存     
-		HGLOBAL hgl = GlobalAlloc(GMEM_MOVEABLE, 256 * sizeof(WCHAR));
-		LPWSTR lpstrcpy = (LPWSTR)GlobalLock(hgl);
-		memcpy(lpstrcpy, buf, 256 * sizeof(WCHAR));
-		GlobalUnlock(hgl);
-		SetClipboardData(CF_UNICODETEXT, lpstrcpy);
-		//关闭剪贴板     
-		CloseClipboard();
-		break;
-	}
-
-	case IDOK:
-
-		DWORD dwError = GetDlgItemInt(hwnd, IDC_FILEPATH, NULL, FALSE);
-
-		OPENFILENAME  ofn;
-		myFileDialogConfig(ofn, hwnd);
-		if (GetOpenFileName(&ofn))
 		{
-			if (ofn.lpstrFile != NULL)
-			{
-				SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
+			//复制内容     
+			//打开剪贴板     
+			OpenClipboard(NULL);
+			//清空剪贴板     
+			EmptyClipboard();
 
-				char* filedata = (char*)getFileInfo(ofn.lpstrFile);
-				sophosParse = new SophosParse();
-				sophosParse->readandparseJsonFromFile(filedata);
-
-				UnmapViewOfFile(filedata);
-
-				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-				TreeView_DeleteAllItems(m_tree);
-				InitTreeControl();
-			}
+			//分配内存     
+			HGLOBAL hgl = GlobalAlloc(GMEM_MOVEABLE, 256 * sizeof(WCHAR));
+			LPWSTR lpstrcpy = (LPWSTR)GlobalLock(hgl);
+			memcpy(lpstrcpy, buf, 256 * sizeof(WCHAR));
+			GlobalUnlock(hgl);
+			SetClipboardData(CF_UNICODETEXT, lpstrcpy);
+			//关闭剪贴板     
+			CloseClipboard();
+			break;
 		}
 
-		break;
+	case IDOK:
+		{
+			CHAR fileName[MAX_PATH];
+			DWORD dwError = GetDlgItemTextA(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
+			VtApi *vt_api = new VtApi();
+			vt_api->VtReport(nullptr, fileName);
+			/*char* filedata = (char*)getFileInfo(fileName);
+			sophosParse = new SophosParse();
+			sophosParse->readandparseJsonFromFile(filedata);
+
+			UnmapViewOfFile(filedata);
+
+			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+			TreeView_DeleteAllItems(m_tree);
+			InitTreeControl();*/
+			/*OPENFILENAME  ofn;
+			myFileDialogConfig(ofn, hwnd);
+			if (GetOpenFileName(&ofn))
+			{
+				if (ofn.lpstrFile != NULL)
+				{
+					SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
+
+					char* filedata = (char*)getFileInfo(ofn.lpstrFile);
+					sophosParse = new SophosParse();
+					sophosParse->readandparseJsonFromFile(filedata);
+
+					UnmapViewOfFile(filedata);
+
+					m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+					TreeView_DeleteAllItems(m_tree);
+					InitTreeControl();
+				}
+			}*/
+
+			break;
+		}
 	}
 }
 
@@ -268,92 +281,13 @@ int InitTreeControl()
 	return 0;
 }
 
-void getVirustotalJson(HWND hDlg)
+VOID OnDropFiles(HWND hwnd, HDROP hDropInfo)
 {
-	CURL *curl;
-	CURLcode res;
-
-	struct curl_httppost *formpost = NULL;
-	struct curl_httppost *lastptr = NULL;
-	struct curl_slist *headerlist = NULL;
-	static const char header_buf[] = "Expect:";
-	long http_response_code = 0;
-	CHAR *data = (CHAR*)malloc(600);
-	memset(data, 0, 600);
-
-	curl_global_init(CURL_GLOBAL_ALL);
-
-	/* Fill in the file upload field */
-	curl_formadd(&formpost,
-		&lastptr,
-		CURLFORM_COPYNAME, "file",
-		CURLFORM_FILE, "83fba62fbb414fa09c2110e2b426501e1859a046.apk",
-		CURLFORM_END);
-
-	/* Fill in the filename field */
-	curl_formadd(&formpost,
-		&lastptr,
-		CURLFORM_COPYNAME, "filename",
-		CURLFORM_COPYCONTENTS, "83fba62fbb414fa09c2110e2b426501e1859a046.apk",
-		CURLFORM_END);
-
-	/* Fill in the submit field too, even if this is rarely needed */
-	curl_formadd(&formpost,
-		&lastptr,
-		CURLFORM_COPYNAME, "apikey",
-		CURLFORM_COPYCONTENTS, "63efab1f4d9bd879a836a9a38917d89265aedb261ea334df9637fef108512821",
-		CURLFORM_END);
-
-	curl = curl_easy_init();
-	/* initalize custom header list (stating that Expect: 100-continue is not
-	wanted */
-	headerlist = curl_slist_append(headerlist, header_buf);
-	if (curl) {
-		/* what URL that receives this POST */
-
-		curl_easy_setopt(curl, CURLOPT_URL, "http://www.virustotal.com/vtapi/v2/file/scan");
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header_buf);
-		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-
-		//通过write_data方法将联网返回数据写入到data中
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
-
-		/* Perform the request, res will get the return code */
-		res = curl_easy_perform(curl);
-		/* Check for errors */
-		if (res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
-		else
-		{
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response_code);
-			if (http_response_code == 200) 
-			{
-				MessageBox(hDlg, StringToWchar_t(data), L"Example", MB_OK | MB_ICONINFORMATION);
-			}
-		}
-		/* always cleanup */
-		curl_easy_cleanup(curl);
-
-		/* then cleanup the formpost chain */
-		curl_formfree(formpost);
-		/* free slist */
-		curl_slist_free_all(headerlist);
-	}
-}
-
-size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
-{
-	size_t bytes = size * nmemb;  // total amount of data.
-	CHAR* page_hand = (CHAR*)stream;
-	stream = (CHAR*)realloc(page_hand, bytes);
-	if (!page_hand)
-	{
-		return size * nmemb;
-	}
-	memcpy(page_hand, ptr, bytes);
-	page_hand[bytes] = 0;
-
-	return size * nmemb;
+	//UINT  nFileCount = DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);  //查询一共拖拽了几个文件  
+	TCHAR szFileName[MAX_PATH] = TEXT("");
+	DragQueryFile(hDropInfo, 0, szFileName, sizeof(szFileName));  //打开拖拽的第一个(下标为0)文件  
+	HWND hEdit = GetDlgItem(hwnd, IDC_FILEPATH);
+	SetWindowText(hEdit, szFileName);
+	//完成拖入文件操作，系统释放缓冲区   
+	DragFinish(hDropInfo);
 }

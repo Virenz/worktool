@@ -28,6 +28,12 @@
     <Filter Include="头文件\libcurl">
       <UniqueIdentifier>{c519b6ab-2fcf-4115-a1e1-684d05a97e6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\vthttp">
+      <UniqueIdentifier>{c756ccac-1023-4806-9005-7c942f408f5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\vthttp">
+      <UniqueIdentifier>{428ccd5a-8e7f-400e-84b6-4dcc992e6aa3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -47,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="sophos\sophosparse.cpp">
       <Filter>源文件\sophos</Filter>
+    </ClCompile>
+    <ClCompile Include="vthttp\vtapi.cpp">
+      <Filter>源文件\vthttp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="sophos\sophosparse.h">
       <Filter>头文件\sophos</Filter>
+    </ClInclude>
+    <ClInclude Include="vthttp\vtapi.h">
+      <Filter>头文件\vthttp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
