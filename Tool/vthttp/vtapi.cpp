@@ -204,6 +204,7 @@ void VtApi::VtReport(void * getdata, char * sourses)
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
 		//通过write_data方法将联网返回数据写入到data中
+
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
 
