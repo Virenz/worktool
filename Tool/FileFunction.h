@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string>
 #include <locale>
+#include <regex>
 
 typedef unsigned char       u1;
 
@@ -109,4 +110,21 @@ std::string WstringToString(const std::wstring str)
 	std::string str1(p);
 	delete[] p;
 	return str1;
+}
+
+// 正则表达式匹配sha1/md5/sha256
+bool is_report_valid(const std::string& email)
+{
+	const std::regex pattern("[a-z0-9]{40}");
+	std:: match_results<std::string::const_iterator> result;
+	bool valid = std::regex_match(email, result, pattern);
+	//此处result参数可有可无，result是一个字符串数组，用来存储正则表达式里面括号的内容。
+	if(valid&&(result.length()>0))
+	{
+		for(int i =0;i<result.length();i++)
+		{
+			printf("%s", result[i]);
+		}
+	}
+	return valid;
 }

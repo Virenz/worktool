@@ -2,6 +2,8 @@
 
 VtApi::VtApi()
 {
+	chunk.memory = (char*)malloc(1);  /* will be grown as needed by the realloc above */
+	chunk.size = 0;    /* no data at this point */
 }
 
 VtApi::~VtApi()
@@ -10,14 +12,21 @@ VtApi::~VtApi()
 
 size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream)
 {
-	size_t bytes = size * nmemb;  // total amount of data.
-	CHAR* page_hand = (CHAR*)stream;
-	page_hand = (CHAR*)realloc(page_hand, bytes+1);
+	size_t realsize = size * nmemb;
+	_MEMORYSTRUNCT* mem = (_MEMORYSTRUNCT*)stream;
 
-	memcpy(page_hand, ptr, bytes);
-	page_hand[bytes] = 0;
+	mem->memory = (char*)realloc(mem->memory, mem->size + realsize + 1);
+	if (mem->memory == NULL) {
+		/* out of memory! */
+		printf("not enough memory (realloc returned NULL)\n");
+		return 0;
+	}
 
-	return size * nmemb;
+	memcpy(&(mem->memory[mem->size]), ptr, realsize);
+	mem->size += realsize;
+	mem->memory[mem->size] = 0;
+
+	return realsize;
 }
 
 void VtApi::VtScanFile(void * getdata, char * filepath)
@@ -69,7 +78,7 @@ void VtApi::VtScanFile(void * getdata, char * filepath)
 
 		//通过write_data方法将联网返回数据写入到data中
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, chunk);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
@@ -137,7 +146,7 @@ void VtApi::VtRescanFile(void * getdata, char * sourses)
 
 		//通过write_data方法将联网返回数据写入到data中
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, chunk);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
@@ -199,14 +208,17 @@ void VtApi::VtReport(void * getdata, char * sourses)
 	if (curl) {
 		/* what URL that receives this POST */
 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://www.virustotal.com/vtapi/v2/file/report");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://www.virustotal.com/vtapi/v2/file/report");
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header_buf);
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
 		//通过write_data方法将联网返回数据写入到data中
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
@@ -219,7 +231,7 @@ void VtApi::VtReport(void * getdata, char * sourses)
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response_code);
 			if (http_response_code == 200)
 			{
-				//MessageBox(hDlg, StringToWchar_t(data), L"Example", MB_OK | MB_ICONINFORMATION);
+				printf("%s memory retrieved\n", chunk.memory);
 			}
 		}
 		/* always cleanup */
