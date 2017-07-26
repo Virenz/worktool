@@ -8,6 +8,8 @@ VtApi::VtApi()
 
 VtApi::~VtApi()
 {
+	free(chunk.memory);
+	chunk.size = 0;
 }
 
 size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream)

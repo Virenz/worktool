@@ -1,9 +1,9 @@
 #pragma once
 #include <Windows.h>  
-#include <stdio.h>
 #include <string>
 #include <locale>
 #include <regex>
+#include <vector>
 
 typedef unsigned char       u1;
 
@@ -113,17 +113,25 @@ std::string WstringToString(const std::wstring str)
 }
 
 // 正则表达式匹配sha1/md5/sha256
-bool is_report_valid(const std::string& email)
+bool is_report_valid(const std::string& data, std::vector<const char*> reportdata)
 {
 	const std::regex pattern("[a-z0-9]{40}");
 	std:: match_results<std::string::const_iterator> result;
-	bool valid = std::regex_match(email, result, pattern);
+	bool valid = std::regex_match(data, result, pattern);
 	//此处result参数可有可无，result是一个字符串数组，用来存储正则表达式里面括号的内容。
+	std::string strbuf;
 	if(valid&&(result.length()>0))
 	{
-		for(int i =0;i<result.length();i++)
+		for(int i = 0;i<result.length();i++)
 		{
+			if (i % 4 == 0 && i != 0)
+			{
+				reportdata.push_back(strbuf.c_str());
+				strbuf.clear();
+			}
 			printf("%s", result[i]);
+			strbuf.append(result[i]);
+			strbuf.append(",");
 		}
 	}
 	return valid;
