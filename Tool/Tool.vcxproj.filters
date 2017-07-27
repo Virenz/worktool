@@ -34,6 +34,12 @@
     <Filter Include="源文件\vthttp">
       <UniqueIdentifier>{428ccd5a-8e7f-400e-84b6-4dcc992e6aa3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\virustotal">
+      <UniqueIdentifier>{ca63f0d4-e2bc-405f-976a-e836046f777f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\virustotal">
+      <UniqueIdentifier>{6758d161-393d-4c2c-be81-705e8166d1eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -56,6 +62,15 @@
     </ClCompile>
     <ClCompile Include="vthttp\vtapi.cpp">
       <Filter>源文件\vthttp</Filter>
+    </ClCompile>
+    <ClCompile Include="virustotal\vtinfo.cpp">
+      <Filter>源文件\virustotal</Filter>
+    </ClCompile>
+    <ClCompile Include="virustotal\scaninfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="virustotal\vtparse.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="vthttp\vtapi.h">
       <Filter>头文件\vthttp</Filter>
+    </ClInclude>
+    <ClInclude Include="virustotal\vtinfo.h">
+      <Filter>头文件\virustotal</Filter>
+    </ClInclude>
+    <ClInclude Include="virustotal\scaninfo.h">
+      <Filter>头文件\virustotal</Filter>
+    </ClInclude>
+    <ClInclude Include="virustotal\vtparse.h">
+      <Filter>头文件\virustotal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -25,8 +25,6 @@ public:
 	void VtRescanFile(void* getdata, char* sourses);
 	void VtReport(void* getdata, char* sourses);
 
-	
-
 protected:
 	WriteData_bc callback;
 	_MEMORYSTRUNCT chunk;
