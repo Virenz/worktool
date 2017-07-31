@@ -31,8 +31,10 @@ size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream)
 	return realsize;
 }
 
-void VtApi::VtScanFile(void * getdata, char * filepath)
+bool VtApi::VtScanFile(char * filepath)
 {
+	bool isSuccess = false;
+
 	CURL *curl;
 	CURLcode res;
 
@@ -74,7 +76,7 @@ void VtApi::VtScanFile(void * getdata, char * filepath)
 	if (curl) {
 		/* what URL that receives this POST */
 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://www.virustotal.com/vtapi/v2/file/scan");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://www.virustotal.com/vtapi/v2/file/scan");
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header_buf);
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
@@ -86,13 +88,17 @@ void VtApi::VtScanFile(void * getdata, char * filepath)
 		res = curl_easy_perform(curl);
 		/* Check for errors */
 		if (res != CURLE_OK)
+		{
 			fprintf(stderr, "curl_easy_perform() failed: %s\n",
 				curl_easy_strerror(res));
+			isSuccess = false;
+		}
 		else
 		{
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response_code);
 			if (http_response_code == 200)
 			{
+				isSuccess = true;
 				//MessageBox(hDlg, StringToWchar_t(data), L"Example", MB_OK | MB_ICONINFORMATION);
 			}
 		}
@@ -104,10 +110,13 @@ void VtApi::VtScanFile(void * getdata, char * filepath)
 		/* free slist */
 		curl_slist_free_all(headerlist);
 	}
+	return isSuccess;
 }
 
-void VtApi::VtRescanFile(void * getdata, char * sourses)
+bool VtApi::VtRescanFile(char * sourses)
 {
+	bool isSuccess = false;
+
 	CURL *curl;
 	CURLcode res;
 
@@ -154,13 +163,17 @@ void VtApi::VtRescanFile(void * getdata, char * sourses)
 		res = curl_easy_perform(curl);
 		/* Check for errors */
 		if (res != CURLE_OK)
+		{
 			fprintf(stderr, "curl_easy_perform() failed: %s\n",
 				curl_easy_strerror(res));
+			isSuccess = false;
+		}
 		else
 		{
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response_code);
 			if (http_response_code == 200)
 			{
+				isSuccess = true;
 				//MessageBox(hDlg, StringToWchar_t(data), L"Example", MB_OK | MB_ICONINFORMATION);
 			}
 		}
@@ -172,10 +185,12 @@ void VtApi::VtRescanFile(void * getdata, char * sourses)
 		/* free slist */
 		curl_slist_free_all(headerlist);
 	}
+	return isSuccess;
 }
 
-void VtApi::VtReport(void * getdata, char * sourses)
+bool VtApi::VtReport(char * sourses)
 {
+	bool isSuccess = false;
 	CURL *curl;
 	CURLcode res;
 
@@ -226,14 +241,18 @@ void VtApi::VtReport(void * getdata, char * sourses)
 		res = curl_easy_perform(curl);
 		/* Check for errors */
 		if (res != CURLE_OK)
+		{
 			fprintf(stderr, "curl_easy_perform() failed: %s\n",
 				curl_easy_strerror(res));
+			isSuccess = false;
+		}
 		else
 		{
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response_code);
 			if (http_response_code == 200)
 			{
 				printf("%s memory retrieved\n", chunk.memory);
+				isSuccess = true;
 			}
 		}
 		/* always cleanup */
@@ -244,4 +263,10 @@ void VtApi::VtReport(void * getdata, char * sourses)
 		/* free slist */
 		curl_slist_free_all(headerlist);
 	}
+	return  isSuccess;
+}
+
+char* VtApi::getReportJson()
+{
+	return this->chunk.memory;
 }

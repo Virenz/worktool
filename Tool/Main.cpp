@@ -200,7 +200,14 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 			CHAR fileName[MAX_PATH];
 			DWORD dwError = GetDlgItemTextA(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
 			VtApi *vt_api = new VtApi();
-			vt_api->VtReport(nullptr, fileName);
+			bool isSuccess = vt_api->VtReport(fileName);
+			if (isSuccess)
+			{
+				char* testjson = vt_api->getReportJson();
+				printf("%s", testjson);
+				
+			}
+			delete vt_api;
 			/*char* filedata = (char*)getFileInfo(fileName);
 			sophosParse = new SophosParse();
 			sophosParse->readandparseJsonFromFile(filedata);

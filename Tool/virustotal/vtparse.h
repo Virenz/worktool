@@ -5,8 +5,7 @@
 #include <vector>
 
 #define SET(lpThis, key, value) lpThis##"->set_"##key(value)
-#define VT_RESPONSE_JSON_SET(lpThis,member_name,value) lpThis->##member_name(value) 
- 
+#define VT_RESPONSE_JSON_SET(lpThis,member_name,value) lpThis->set_##member_name(value) 
 
 class VtParse
 {

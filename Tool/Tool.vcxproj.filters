@@ -67,10 +67,10 @@
       <Filter>源文件\virustotal</Filter>
     </ClCompile>
     <ClCompile Include="virustotal\scaninfo.cpp">
-      <Filter>源文件</Filter>
+      <Filter>源文件\virustotal</Filter>
     </ClCompile>
     <ClCompile Include="virustotal\vtparse.cpp">
-      <Filter>源文件</Filter>
+      <Filter>源文件\virustotal</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

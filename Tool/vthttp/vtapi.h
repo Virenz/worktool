@@ -21,12 +21,12 @@ public:
 
 	//virtual size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream);
 
-	void VtScanFile(void* getdata, char* filepath);
-	void VtRescanFile(void* getdata, char* sourses);
-	void VtReport(void* getdata, char* sourses);
+	bool VtScanFile(char* filepath);
+	bool VtRescanFile(char* sourses);
+	bool VtReport(char* sourses);
+	char* getReportJson();
 
 protected:
 	WriteData_bc callback;
 	_MEMORYSTRUNCT chunk;
-	
 };
