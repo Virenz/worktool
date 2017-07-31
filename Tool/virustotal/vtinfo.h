@@ -42,11 +42,18 @@ public:
 	void set_md5(std::string md5);
 	std::string get_md5();
 
-	void set_scans(std::string& key, ScanInfo value);
-	std::multimap<std::string, ScanInfo>& get_scans();
+	void set_scans(std::string& key, ScanInfo* value);
+	std::multimap<std::string, ScanInfo*>& get_scans();
+
+	void setVirusName(std::string virusname);
+	std::string getVirusName();
+
+	void set_vtsinfo(std::string& key, std::string& value);
+	std::multimap<std::string, std::string>& get_vtsinfo();
 
 private:
-	std::multimap<std::string, ScanInfo> scansinfo;
+	std::multimap<std::string, std::string> vtsinfo;
+	std::multimap<std::string, ScanInfo*> scansinfo;
 	std::string virusname;
 	/*"scan_id": "4c28fcdfde9e11e18ee60ab9132d4abf69777785047364ea9adf6dc5974a67af-1470133345",
 	"sha1": "1eed2698fee72789c024a565d2cf3a663e8da48f",

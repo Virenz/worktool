@@ -6,6 +6,18 @@ VtInfo::VtInfo()
 
 VtInfo::~VtInfo()
 {
+	vtsinfo.clear();
+	std::multimap<std::string, ScanInfo*>::iterator iter = scansinfo.begin();
+	while (iter != scansinfo.end()) //#1
+	{
+		//注意要先释放内存，在删除map元素，顺序不能颠倒。
+		//释放内存
+		delete iter->second;
+		iter->second = NULL;
+		//删除map元素
+		scansinfo.erase(iter++); //#1
+	}
+	scansinfo.clear();
 }
 
 void VtInfo::set_scan_id(std::string scan_id)
@@ -119,13 +131,33 @@ std::string VtInfo::get_md5()
 }
 
 
-void VtInfo::set_scans(std::string & key, ScanInfo value)
+void VtInfo::set_scans(std::string & key, ScanInfo* value)
 {
-	scansinfo.insert(std::pair<std::string, ScanInfo>(key, value));
+	scansinfo.insert(std::pair<std::string, ScanInfo*>(key, value));
 }
 
-std::multimap<std::string, ScanInfo>& VtInfo::get_scans()
+std::multimap<std::string, ScanInfo*>& VtInfo::get_scans()
 {
 	// TODO: 在此处插入 return 语句
 	this->scansinfo;
+}
+
+void VtInfo::setVirusName(std::string virusname)
+{
+	this->virusname = virusname;
+}
+
+std::string VtInfo::getVirusName()
+{
+	return this->virusname;
+}
+
+void VtInfo::set_vtsinfo(std::string & key, std::string & value)
+{
+	this->vtsinfo.insert(std::pair<std::string, std::string>(key, value));
+}
+
+std::multimap<std::string, std::string>& VtInfo::get_vtsinfo()
+{
+	return this->vtsinfo;
 }

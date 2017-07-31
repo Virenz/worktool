@@ -61,4 +61,15 @@ SophosParse::SophosParse()
 
 SophosParse::~SophosParse()
 {
+	std::vector<SophosInfo*>::iterator iter = sophosInfos.begin();
+	while (iter != sophosInfos.end()) //#1
+	{
+		//注意要先释放内存，在删除vector元素，顺序不能颠倒。
+		//释放内存
+		delete *iter;
+		*iter = NULL;
+		//删除vector元素
+		sophosInfos.erase(iter++); //#1
+	}
+	sophosInfos.clear();
 }

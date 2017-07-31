@@ -13,19 +13,36 @@ int VtParse::readandparseJsonFromFile(char* vtdatas)
 
 	if (reader.parse(vtdatas, root, 0))
 	{
-		VtInfo* vtInfo = new VtInfo();
-		Json::Value::Members arrayMember = root.getMemberNames(); //ayyayMember是成员名称的集合，即name,age;
-		for (Json::Value::Members::iterator iter = arrayMember.begin(); iter != arrayMember.end(); ++iter) //遍历json成员
+		if (root.isObject())
 		{
-			Json::Value valueList = root.get(*iter, "null");
-			int file_size = valueList.size();  // 得到"files"的数组个数 
-			for (size_t i = 0; i < file_size; i++)
+			VtInfo* vtInfo = new VtInfo();
+			Json::Value::Members arrayMember = root.getMemberNames(); //ayyayMember是成员名称的集合
+			for (Json::Value::Members::iterator iter = arrayMember.begin(); iter != arrayMember.end(); ++iter) //遍历json成员
 			{
-				//VT_RESPONSE_JSON_SET(vtInfo, key, valueList.asString());
-				//sophosinfo->setJsonsInfo(*iter, valueList[i].asString());
+				Json::Value valueList = root.get(*iter, "null");
+				if ((*iter)=="scans")
+				{
+					Json::Value::Members scansMember = valueList.getMemberNames(); //scansMember是成员名称的集合
+					for (Json::Value::Members::iterator scans_id = scansMember.begin(); scans_id != scansMember.end(); ++scans_id) //遍历scans成员
+					{
+						Json::Value scans_name = root.get(*scans_id, "null");
+						if (scans_name["detected"].asBool())
+						{
+							ScanInfo* scaninfo = new ScanInfo();
+							scaninfo->set_result(scans_name["result"].asString());
+							vtInfo->set_scans(*scans_id, scaninfo);
+						}
+					}
+				}
+				else
+				{
+					vtInfo->set_vtsinfo(*iter, valueList.asString());
+				}
+				
 			}
+			vtInfos.push_back(vtInfo);
 		}
-		//sophosInfos.push_back(sophosinfo);
+		
 	}
 
 	return 0;

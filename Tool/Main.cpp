@@ -204,8 +204,7 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 			if (isSuccess)
 			{
 				char* testjson = vt_api->getReportJson();
-				printf("%s", testjson);
-				
+				OutputDebugStringA(testjson);
 			}
 			delete vt_api;
 			/*char* filedata = (char*)getFileInfo(fileName);
