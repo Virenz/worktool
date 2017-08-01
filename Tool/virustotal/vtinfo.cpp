@@ -90,22 +90,22 @@ std::string VtInfo::get_verbose_msg()
 	return this->verbose_msg;
 }
 
-void VtInfo::set_total(std::string total)
+void VtInfo::set_total(int total)
 {
 	this->total = total;
 }
 
-std::string VtInfo::get_total()
+int VtInfo::get_total()
 {
 	return this->total;
 }
 
-void VtInfo::set_positives(std::string positives)
+void VtInfo::set_positives(int positives)
 {
 	this->positives = positives;
 }
 
-std::string VtInfo::get_positives()
+int VtInfo::get_positives()
 {
 	return this->positives;
 }
@@ -139,7 +139,7 @@ void VtInfo::set_scans(std::string & key, ScanInfo* value)
 std::multimap<std::string, ScanInfo*>& VtInfo::get_scans()
 {
 	// TODO: 在此处插入 return 语句
-	this->scansinfo;
+	return this->scansinfo;
 }
 
 void VtInfo::setVirusName(std::string virusname)

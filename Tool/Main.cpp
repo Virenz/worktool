@@ -7,13 +7,15 @@
 #include "FileFunction.h"
 
 #include "vthttp\vtapi.h"
+#include "virustotal\vtparse.h"
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 // 实现文件拖动进入TEXT框
 VOID OnDropFiles(HWND hwnd, HDROP hDropInfo);
 
-int InitTreeControl();
+template<class T>
+int InitTreeControl(T *uidatas);
 
 HINSTANCE hgInst;
 HWND m_tree;
@@ -205,7 +207,15 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 			{
 				char* testjson = vt_api->getReportJson();
 				OutputDebugStringA(testjson);
+				VtParse* vtParse = new VtParse();
+				vtParse->readandparseJsonFromFile(testjson);
+
+				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+				TreeView_DeleteAllItems(m_tree);
+				InitTreeControl(vtParse);
+				delete vtParse;
 			}
+			
 			delete vt_api;
 			/*char* filedata = (char*)getFileInfo(fileName);
 			sophosParse = new SophosParse();
@@ -241,15 +251,18 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 	}
 }
 
-int InitTreeControl()
+template<class T> 
+int InitTreeControl(T *uidatas)
 {
-	std::vector<SophosInfo*>& sophosInfos = sophosParse->getSophosInfos();
-	for (SophosInfo* sp : sophosInfos)
+	auto infos = uidatas->getVtInfos();
+	for (auto sp : infos)
 	{
+		CHAR vt_name[MAX_PATH];
+		sprintf_s(vt_name, " : %d/%d", sp->get_positives(), sp->get_total());
 		TV_ITEM item;
-		item.mask = TVIF_TEXT | TVIF_PARAM;
-		item.cchTextMax = 2;
-		item.pszText = StringToWchar_t(sp->getVirusName());
+		item.mask = TVIF_TEXT;
+		item.cchTextMax = 10;
+		item.pszText = StringToWchar_t(sp->getVirusName() + vt_name);
 
 		TV_INSERTSTRUCT insert;
 		insert.hParent = TVI_ROOT;
@@ -257,12 +270,12 @@ int InitTreeControl()
 		insert.item = item;
 
 		Selected = TreeView_InsertItem(m_tree, &insert);
-		for (std::multimap<std::string, std::string>::iterator iter = sp->getJsonsInfo().begin(); iter != sp->getJsonsInfo().end(); ++iter) //遍历json成员
+		for (std::multimap<std::string, ScanInfo*>::iterator iter = sp->get_scans().begin(); iter != sp->get_scans().end(); ++iter) //遍历json成员
 		{
 			std::string str;
 			str.append(iter->first);
 			str.append(" : ");
-			str.append(iter->second);
+			str.append(iter->second->get_result());
 			wchar_t * wszUtf8 = StringToWchar_t(str);
 
 			TV_ITEM item1;
@@ -281,8 +294,6 @@ int InitTreeControl()
 		}
 
 	}
-	sophosInfos.clear();
-	delete sophosParse;
 
 	return 0;
 }
@@ -297,3 +308,44 @@ VOID OnDropFiles(HWND hwnd, HDROP hDropInfo)
 	//完成拖入文件操作，系统释放缓冲区   
 	DragFinish(hDropInfo);
 }
+
+
+//std::vector<SophosInfo*>& sophosInfos = sophosParse->getSophosInfos();
+//for (SophosInfo* sp : sophosInfos)
+//{
+//	TV_ITEM item;
+//	item.mask = TVIF_TEXT | TVIF_PARAM;
+//	item.cchTextMax = 2;
+//	item.pszText = StringToWchar_t(sp->getVirusName());
+//
+//	TV_INSERTSTRUCT insert;
+//	insert.hParent = TVI_ROOT;
+//	insert.hInsertAfter = TVI_LAST;
+//	insert.item = item;
+//
+//	Selected = TreeView_InsertItem(m_tree, &insert);
+//	for (std::multimap<std::string, std::string>::iterator iter = sp->getJsonsInfo().begin(); iter != sp->getJsonsInfo().end(); ++iter) //遍历json成员
+//	{
+//		std::string str;
+//		str.append(iter->first);
+//		str.append(" : ");
+//		str.append(iter->second);
+//		wchar_t * wszUtf8 = StringToWchar_t(str);
+//
+//		TV_ITEM item1;
+//		item1.mask = TVIF_TEXT | TVIF_PARAM | TVS_HASLINES | TVS_LINESATROOT;
+//		item1.cchTextMax = 2;
+//		item1.pszText = wszUtf8;
+//
+//		TV_INSERTSTRUCT insert1;
+//		insert1.hParent = Selected;
+//		insert1.hInsertAfter = TVI_LAST;
+//		insert1.item = item1;
+//
+//		HTREEITEM root2 = TreeView_InsertItem(m_tree, &insert1);
+//
+//		delete[] wszUtf8;
+//	}
+//
+//}
+//delete sophosParse;

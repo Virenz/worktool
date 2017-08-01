@@ -10,6 +10,8 @@
 class VtParse
 {
 public:
+	VtParse();
+	~VtParse();
 	std::vector<VtInfo*>& getVtInfos();
 	int readandparseJsonFromFile(char* vtdatas);
 

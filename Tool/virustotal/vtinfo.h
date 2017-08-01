@@ -30,11 +30,11 @@ public:
 	void set_verbose_msg(std::string verbose_msg);
 	std::string get_verbose_msg();
 
-	void set_total(std::string total);
-	std::string get_total();
+	void set_total(int total);
+	int get_total();
 
-	void set_positives(std::string positives);
-	std::string get_positives();
+	void set_positives(int positives);
+	int get_positives();
 
 	void set_sha256(std::string sha256);
 	std::string get_sha256();
@@ -74,8 +74,8 @@ private:
 	std::string scan_date;
 	std::string permalink;
 	std::string verbose_msg;
-	std::string total;
-	std::string positives;
+	int total;
+	int positives;
 	std::string sha256;
 	std::string md5;
 };

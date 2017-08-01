@@ -208,7 +208,7 @@ bool VtApi::VtReport(char * sourses)
 	curl_formadd(&formpost,
 		&lastptr,
 		CURLFORM_COPYNAME, "resource",
-		CURLFORM_COPYCONTENTS, "83fba62fbb414fa09c2110e2b426501e1859a046",
+		CURLFORM_COPYCONTENTS, sourses,
 		CURLFORM_END);
 
 	/* Fill in the apikey */
