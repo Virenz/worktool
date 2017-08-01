@@ -13,6 +13,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 // 实现文件拖动进入TEXT框
 VOID OnDropFiles(HWND hwnd, HDROP hDropInfo);
+void performActions(HWND hwnd, WCHAR* txContent);
 
 template<class T>
 int InitTreeControl(T *uidatas);
@@ -22,7 +23,13 @@ HWND m_tree;
 TV_ITEM tvi = {0};
 TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
-SophosParse* sophosParse;
+
+//对应
+//1:SHA1/MD5/SHA256
+//2:APK
+//3:avt邮件
+//4:sophos
+UINT m_type = 0;
 
 int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nShow)
 {
@@ -196,56 +203,11 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 			CloseClipboard();
 			break;
 		}
-
 	case IDOK:
 		{
-			CHAR fileName[MAX_PATH];
-			DWORD dwError = GetDlgItemTextA(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
-			VtApi *vt_api = new VtApi();
-			bool isSuccess = vt_api->VtReport(fileName);
-			if (isSuccess)
-			{
-				char* testjson = vt_api->getReportJson();
-				OutputDebugStringA(testjson);
-				VtParse* vtParse = new VtParse();
-				vtParse->readandparseJsonFromFile(testjson);
-
-				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-				TreeView_DeleteAllItems(m_tree);
-				InitTreeControl(vtParse);
-				delete vtParse;
-			}
-			
-			delete vt_api;
-			/*char* filedata = (char*)getFileInfo(fileName);
-			sophosParse = new SophosParse();
-			sophosParse->readandparseJsonFromFile(filedata);
-
-			UnmapViewOfFile(filedata);
-
-			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-			TreeView_DeleteAllItems(m_tree);
-			InitTreeControl();*/
-			/*OPENFILENAME  ofn;
-			myFileDialogConfig(ofn, hwnd);
-			if (GetOpenFileName(&ofn))
-			{
-				if (ofn.lpstrFile != NULL)
-				{
-					SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
-
-					char* filedata = (char*)getFileInfo(ofn.lpstrFile);
-					sophosParse = new SophosParse();
-					sophosParse->readandparseJsonFromFile(filedata);
-
-					UnmapViewOfFile(filedata);
-
-					m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-					TreeView_DeleteAllItems(m_tree);
-					InitTreeControl();
-				}
-			}*/
-
+			WCHAR fileName[MAX_PATH];
+			DWORD dwError = GetDlgItemText(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
+			performActions(hwnd, fileName);
 			break;
 		}
 	}
@@ -307,6 +269,91 @@ VOID OnDropFiles(HWND hwnd, HDROP hDropInfo)
 	SetWindowText(hEdit, szFileName);
 	//完成拖入文件操作，系统释放缓冲区   
 	DragFinish(hDropInfo);
+}
+
+void performActions(HWND hwnd, WCHAR* txContent)
+{
+	if (IsDlgButtonChecked(hwnd, IDC_MD) == BST_CHECKED)
+		m_type = 1;
+	if (IsDlgButtonChecked(hwnd, IDC_APK) == BST_CHECKED)
+		m_type = 2;
+	if (IsDlgButtonChecked(hwnd, IDC_AVT) == BST_CHECKED)
+		m_type = 3;
+	if (IsDlgButtonChecked(hwnd, IDC_SOPHOS) == BST_CHECKED)
+		m_type = 4;
+
+	switch (m_type)
+	{
+	case 1:
+		{
+			VtApi *vt_api = new VtApi();
+			bool isSuccess = vt_api->VtReport(WstringToString(txContent).c_str());
+			if (isSuccess)
+			{
+				char* testjson = vt_api->getReportJson();
+				OutputDebugStringA(testjson);
+				VtParse* vtParse = new VtParse();
+				vtParse->readandparseJsonFromFile(testjson);
+
+				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+				TreeView_DeleteAllItems(m_tree);
+				InitTreeControl(vtParse);
+				delete vtParse;
+			}
+			delete vt_api;
+		}
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		{
+			char* filedata = (char*)getFileInfo(txContent);
+			SophosParse* sophosParse = new SophosParse();
+			sophosParse->readandparseJsonFromFile(filedata);
+
+			UnmapViewOfFile(filedata);
+
+			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+			TreeView_DeleteAllItems(m_tree);
+			InitTreeControl(sophosParse);
+			delete sophosParse;
+		}
+		break;
+	default:
+		break;
+	}
+
+	
+	/*char* filedata = (char*)getFileInfo(fileName);
+	sophosParse = new SophosParse();
+	sophosParse->readandparseJsonFromFile(filedata);
+
+	UnmapViewOfFile(filedata);
+
+	m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+	TreeView_DeleteAllItems(m_tree);
+	InitTreeControl();*/
+	/*OPENFILENAME  ofn;
+	myFileDialogConfig(ofn, hwnd);
+	if (GetOpenFileName(&ofn))
+	{
+	if (ofn.lpstrFile != NULL)
+	{
+	SetDlgItemText(hwnd, IDC_FILEPATH, ofn.lpstrFile);
+
+	char* filedata = (char*)getFileInfo(ofn.lpstrFile);
+	sophosParse = new SophosParse();
+	sophosParse->readandparseJsonFromFile(filedata);
+
+	UnmapViewOfFile(filedata);
+
+	m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+	TreeView_DeleteAllItems(m_tree);
+	InitTreeControl();
+	}
+	}*/
 }
 
 

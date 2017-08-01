@@ -1,6 +1,6 @@
 #include "sophosparse.h"
 
-std::vector<SophosInfo*>& SophosParse::getSophosInfos()
+std::vector<SophosInfo*>& SophosParse::getInfos()
 {
 	// TODO: 在此处插入 return 语句
 	return this->sophosInfos;
@@ -68,8 +68,7 @@ SophosParse::~SophosParse()
 		//释放内存
 		delete *iter;
 		*iter = NULL;
-		//删除vector元素
-		sophosInfos.erase(iter++); //#1
+		iter++; //#1
 	}
 	sophosInfos.clear();
 }

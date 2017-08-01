@@ -188,7 +188,7 @@ bool VtApi::VtRescanFile(char * sourses)
 	return isSuccess;
 }
 
-bool VtApi::VtReport(char * sourses)
+bool VtApi::VtReport(const char * sourses)
 {
 	bool isSuccess = false;
 	CURL *curl;
@@ -238,6 +238,7 @@ bool VtApi::VtReport(char * sourses)
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
 		/* Perform the request, res will get the return code */
+		
 		res = curl_easy_perform(curl);
 		/* Check for errors */
 		if (res != CURLE_OK)
@@ -255,6 +256,7 @@ bool VtApi::VtReport(char * sourses)
 				isSuccess = true;
 			}
 		}
+
 		/* always cleanup */
 		curl_easy_cleanup(curl);
 

@@ -23,7 +23,7 @@ public:
 
 	bool VtScanFile(char* filepath);
 	bool VtRescanFile(char* sourses);
-	bool VtReport(char* sourses);
+	bool VtReport(const char* sourses);
 	char* getReportJson();
 
 protected:

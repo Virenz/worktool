@@ -10,7 +10,7 @@ public:
 	SophosParse();
 	~SophosParse();
 
-	std::vector<SophosInfo*>& getSophosInfos();
+	std::vector<SophosInfo*>& getInfos();
 	int readandparseJsonFromFile(char* filename);
 
 private:
