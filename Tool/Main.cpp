@@ -356,7 +356,7 @@ void performActions(HWND hwnd, WCHAR* txContent)
 				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
 				TreeView_DeleteAllItems(m_tree);
 
-				bool isSuccess = vt_api->VtScanFile(WstringToString(txContent).c_str());
+				bool isSuccess = vt_api->VtScanFile(WstringToString(txContent).c_str(), m_progress);
 				if (isSuccess)
 				{
 					char* filescanjson = vt_api->getReportJson();
@@ -376,6 +376,7 @@ void performActions(HWND hwnd, WCHAR* txContent)
 							vtParse->readandparseJsonFromFile(reportjson);
 
 							InitTreeControl(vtParse);
+							SendMessage(m_progress, PBM_SETPOS, 100, 0L);
 
 							delete vtParse;
 							vt_api->cleanChunk();

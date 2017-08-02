@@ -1,4 +1,5 @@
 #include "vtapi.h"
+#include <commctrl.h>
 
 VtApi::VtApi()
 {
@@ -34,6 +35,8 @@ int progress_func(void* ptr, double TotalToDownload, double NowDownloaded, doubl
 		char progress_exec[260];
 		sprintf_s(progress_exec, "total: %0.0f, now: %0.0f， fraction: %3.0f\n", NowUpload, TotalToUpload, fractionUpload * 100);
 		OutputDebugStringA(progress_exec);
+		// 给进度条发送消息，传入当前上传的值
+		SendMessage((HWND)ptr, PBM_SETPOS, fractionUpload * totalDot, 0L);
 	}
 	return 0;
 }
@@ -57,7 +60,7 @@ size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream)
 	return realsize;
 }
 
-bool VtApi::VtScanFile(const char * filepath)
+bool VtApi::VtScanFile(const char * filepath, HWND m_progress)
 {
 	bool isSuccess = false;
 
@@ -116,6 +119,7 @@ bool VtApi::VtScanFile(const char * filepath)
 		//设置进度条
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_func);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, m_progress);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
