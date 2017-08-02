@@ -26,6 +26,8 @@ TV_ITEM tvi = {0};
 TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
 
+TCHAR title[20] = L"wlc-tool v0.1";
+
 //对应
 //1:SHA1/MD5/SHA256
 //2:APK
@@ -60,8 +62,9 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_INITDIALOG:
-		// 设置对话框的图标   
-		//SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hgInst, MAKEINTRESOURCE(IDI_APP)));
+		// 设置对话框的图标 
+		SetWindowText(hDlg, title);
+		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hgInst, MAKEINTRESOURCE(IDI_ICON1)));
 		return 0;
 	case WM_SYSCOMMAND:
 		if (wParam == SC_CLOSE)
