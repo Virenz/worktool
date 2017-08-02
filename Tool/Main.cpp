@@ -4,6 +4,7 @@
 #include "resource.h"
 #include <commctrl.h>
 #include <tchar.h> 
+#include <thread>
 
 #include "sophos\sophosparse.h"
 #include "FileFunction.h"
@@ -13,12 +14,12 @@
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
-// 实现文件拖动进入TEXT框
-VOID OnDropFiles(HWND hwnd, HDROP hDropInfo);
-void performActions(HWND hwnd, WCHAR* txContent);
+
+VOID OnDropFiles(HWND hwnd, HDROP hDropInfo);								// 实现文件拖动进入TEXT框
+void performActions(HWND hwnd, WCHAR* txContent);							// 获取单选框和编辑框进行对应的操作
 
 template<class T>
-int InitTreeControl(T *uidatas);
+int InitTreeControl(T *uidatas);											// 进行tree布局显示数据
 
 HINSTANCE hgInst;
 HWND m_tree;
@@ -26,7 +27,8 @@ TV_ITEM tvi = {0};
 TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
 
-TCHAR title[20] = L"wlc-tool v0.1";
+TCHAR title[20] = L"wlc-tool v0.1";											// 设置标题 
+WCHAR fileName[MAX_PATH];													// 获取输入框内容
 
 //对应
 //1:SHA1/MD5/SHA256
@@ -227,9 +229,11 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 		}
 	case IDOK:
 		{
-			WCHAR fileName[MAX_PATH];
+			
 			DWORD dwError = GetDlgItemText(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
-			performActions(hwnd, fileName);
+			std::thread action(performActions, hwnd, fileName);
+			action.detach();
+			//performActions(hwnd, fileName);
 			break;
 		}
 	}
@@ -334,7 +338,7 @@ void performActions(HWND hwnd, WCHAR* txContent)
 			}
 			else
 			{
-				MessageBox(hwnd, L"不匹配", NULL, 0);
+				MessageBox(hwnd, L"非SHA1/MD5/SHA256", NULL, 0);
 			}
 			// 唤醒执行 按钮
 			EnableWindow(GetDlgItem(hwnd, IDOK), true);
@@ -342,8 +346,8 @@ void performActions(HWND hwnd, WCHAR* txContent)
 		break;
 	case 2:
 		{
-			bool m_apk = is_apk_valid(WstringToString(txContent));
-			if (m_apk)
+			int m_apk = is_apk_valid(WstringToString(txContent));
+			if (m_apk > 0)
 			{
 				VtApi *vt_api = new VtApi();
 				// 清除m_tree的界面
@@ -381,7 +385,7 @@ void performActions(HWND hwnd, WCHAR* txContent)
 			}
 			else
 			{
-				MessageBox(hwnd, L"不匹配", NULL, 0);
+				MessageBox(hwnd, L"非apk后缀文件", NULL, 0);
 			}
 			// 唤醒执行 按钮
 			EnableWindow(GetDlgItem(hwnd, IDOK), true);

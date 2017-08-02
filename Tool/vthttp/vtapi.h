@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../include/curl/curl.h"
-#pragma comment(lib, "libcurl.lib") 
+#pragma comment(lib, "libcurl_a.lib") 
 
 #include <functional>
 

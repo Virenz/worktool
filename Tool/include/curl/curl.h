@@ -29,7 +29,6 @@
  * curl-library mailing list subscription and unsubscription web interface:
  *   https://cool.haxx.se/mailman/listinfo/curl-library/
  */
-
 #ifdef CURL_NO_OLDIES
 #define CURL_STRICTER
 #endif
@@ -42,7 +41,7 @@
 /*
  * Define WIN32 when build target is Win32 API
  */
-
+#define CURL_STATICLIB
 #if (defined(_WIN32) || defined(__WIN32__)) && \
      !defined(WIN32) && !defined(__SYMBIAN32__)
 #define WIN32
@@ -96,6 +95,7 @@
 extern "C" {
 #endif
 
+
 #if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
 typedef struct Curl_easy CURL;
 typedef struct Curl_share CURLSH;
@@ -107,7 +107,6 @@ typedef void CURLSH;
 /*
  * libcurl external API function linkage decorations.
  */
-
 #ifdef CURL_STATICLIB
 #  define CURL_EXTERN
 #elif defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)

@@ -160,8 +160,9 @@ bool is_report_valid(const std::string& data, std::vector<std::string> *reportda
 	//return valid;
 }
 
-// 正则表达式匹配sha1/md5/sha256
-bool is_apk_valid(const std::string& data)
+// 匹配apk文件
+int is_apk_valid(const std::string& data)
 {
-	return data.find_last_of(".apk", 0);
+	int index = data.find("apk", 0);
+	return index;
 }
