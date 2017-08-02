@@ -16,6 +16,28 @@ VtApi::~VtApi()
 	chunk.size = 0;
 }
 
+int progress_func(void* ptr, double TotalToDownload, double NowDownloaded, double TotalToUpload, double NowUpload)
+{
+	//how wide you want the progress bar to be ?  
+	int totalDot = 80;
+
+	double fractionUpload = 0.0;
+	if (TotalToUpload != 0)
+		fractionUpload = NowUpload / TotalToUpload;//注意0不能为分母  
+	else
+		fractionUpload = 0;
+	//the full part of progress bar  
+	int dot = round(fractionUpload * totalDot);
+
+	//create the progress bar, but control to print  
+	if (dot % 10 == 0) {
+		char progress_exec[260];
+		sprintf_s(progress_exec, "total: %0.0f, now: %0.0f， fraction: %3.0f\n", NowUpload, TotalToUpload, fractionUpload * 100);
+		OutputDebugStringA(progress_exec);
+	}
+	return 0;
+}
+
 size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream)
 {
 	size_t realsize = size * nmemb;
@@ -90,6 +112,10 @@ bool VtApi::VtScanFile(const char * filepath)
 		//通过write_data方法将联网返回数据写入到data中
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+		//设置进度条
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_func);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);

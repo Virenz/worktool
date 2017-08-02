@@ -23,6 +23,7 @@ int InitTreeControl(T *uidatas);											// 进行tree布局显示数据
 
 HINSTANCE hgInst;
 HWND m_tree;
+HWND m_progress;
 TV_ITEM tvi = {0};
 TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
@@ -42,6 +43,7 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 	hgInst = hThisApp;
 	//DialogBox(hgInst, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
 	HWND hdlg = CreateDialog(hThisApp, MAKEINTRESOURCE(IDD_DIALOG1), GetDesktopWindow(), (DLGPROC)DlgProc);
+	m_progress = GetDlgItem(hdlg, IDC_PROGRESSEXEC);
 	DragAcceptFiles(hdlg,TRUE);
 	if (!hdlg)
 	{
