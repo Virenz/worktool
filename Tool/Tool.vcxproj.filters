@@ -104,6 +104,24 @@
     <ClInclude Include="include\json\writer.h">
       <Filter>头文件\json</Filter>
     </ClInclude>
+    <ClInclude Include="sophos\sophosinfo.h">
+      <Filter>头文件\sophos</Filter>
+    </ClInclude>
+    <ClInclude Include="sophos\sophosparse.h">
+      <Filter>头文件\sophos</Filter>
+    </ClInclude>
+    <ClInclude Include="vthttp\vtapi.h">
+      <Filter>头文件\vthttp</Filter>
+    </ClInclude>
+    <ClInclude Include="virustotal\vtinfo.h">
+      <Filter>头文件\virustotal</Filter>
+    </ClInclude>
+    <ClInclude Include="virustotal\scaninfo.h">
+      <Filter>头文件\virustotal</Filter>
+    </ClInclude>
+    <ClInclude Include="virustotal\vtparse.h">
+      <Filter>头文件\virustotal</Filter>
+    </ClInclude>
     <ClInclude Include="include\curl\curl.h">
       <Filter>头文件\libcurl</Filter>
     </ClInclude>
@@ -134,28 +152,15 @@
     <ClInclude Include="include\curl\typecheck-gcc.h">
       <Filter>头文件\libcurl</Filter>
     </ClInclude>
-    <ClInclude Include="sophos\sophosinfo.h">
-      <Filter>头文件\sophos</Filter>
-    </ClInclude>
-    <ClInclude Include="sophos\sophosparse.h">
-      <Filter>头文件\sophos</Filter>
-    </ClInclude>
-    <ClInclude Include="vthttp\vtapi.h">
-      <Filter>头文件\vthttp</Filter>
-    </ClInclude>
-    <ClInclude Include="virustotal\vtinfo.h">
-      <Filter>头文件\virustotal</Filter>
-    </ClInclude>
-    <ClInclude Include="virustotal\scaninfo.h">
-      <Filter>头文件\virustotal</Filter>
-    </ClInclude>
-    <ClInclude Include="virustotal\vtparse.h">
-      <Filter>头文件\virustotal</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tool.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resource.hm">
+      <Filter>头文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -48,8 +48,8 @@ public:
 	void setVirusName(std::string virusname);
 	std::string getVirusName();
 
-	void set_vtsinfo(std::string& key, std::string& value);
-	std::multimap<std::string, std::string>& get_vtsinfo();
+	void setJsonsInfo(std::string& key, std::string& value);
+	std::multimap<std::string, std::string>& getJsonsInfo();
 
 private:
 	std::multimap<std::string, std::string> vtsinfo;

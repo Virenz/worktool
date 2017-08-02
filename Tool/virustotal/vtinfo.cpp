@@ -152,12 +152,12 @@ std::string VtInfo::getVirusName()
 	return this->virusname;
 }
 
-void VtInfo::set_vtsinfo(std::string & key, std::string & value)
+void VtInfo::setJsonsInfo(std::string & key, std::string & value)
 {
 	this->vtsinfo.insert(std::pair<std::string, std::string>(key, value));
 }
 
-std::multimap<std::string, std::string>& VtInfo::get_vtsinfo()
+std::multimap<std::string, std::string>& VtInfo::getJsonsInfo()
 {
 	return this->vtsinfo;
 }

@@ -1,7 +1,9 @@
 ﻿#include <Windows.h>
 #include <windowsx.h>
+#include <WinUser.h>
 #include "resource.h"
 #include <commctrl.h>
+#include <tchar.h> 
 
 #include "sophos\sophosparse.h"
 #include "FileFunction.h"
@@ -34,7 +36,7 @@ UINT m_type = 0;
 int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nShow)
 {
 	hgInst = hThisApp;
-	//DialogBox(hgInst, MAKEINTRESOURCE(IDD_MY), NULL, DlgProc);
+	//DialogBox(hgInst, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
 	HWND hdlg = CreateDialog(hThisApp, MAKEINTRESOURCE(IDD_DIALOG1), GetDesktopWindow(), (DLGPROC)DlgProc);
 	DragAcceptFiles(hdlg,TRUE);
 	if (!hdlg)
@@ -67,10 +69,26 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(0);//退出     
 		}
 		return 0;
+	case WM_KEYDOWN:
+		if ('A' == wParam)//字母键的虚拟键码为大写字母的ASCII码 
+		{
+			int iState = GetAsyncKeyState(VK_CONTROL);
+			if (iState < 0)
+			{
+				Edit_SetSel(GetDlgItem(hDlg, IDC_FILEPATH), 0, -1);
+				MessageBox(hDlg, L"全选", NULL, 0);
+			}
+			else
+			{
+				MessageBox(hDlg, L"为全选", NULL, 0);
+			}
+		}
+		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
 		case IDOK:
+			EnableWindow(GetDlgItem(hDlg, IDOK), FALSE);
 			Dlg_OnCommand(hDlg, IDOK, GetDlgItem(hDlg, IDOK), BN_CLICKED);
 			break;
 		case ID_COPY_COPY:
@@ -174,6 +192,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnDropFiles(hDlg, (HDROP)wParam);
 		return 0;
 	}
+	//return DefWindowProc(hDlg, msg, wParam, lParam);
 	return (INT_PTR)FALSE;
 }
 
@@ -216,15 +235,13 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 template<class T> 
 int InitTreeControl(T *uidatas)
 {
-	auto infos = uidatas->getVtInfos();
+	auto infos = uidatas->getInfos();
 	for (auto sp : infos)
 	{
-		CHAR vt_name[MAX_PATH];
-		sprintf_s(vt_name, " : %d/%d", sp->get_positives(), sp->get_total());
 		TV_ITEM item;
 		item.mask = TVIF_TEXT;
 		item.cchTextMax = 10;
-		item.pszText = StringToWchar_t(sp->getVirusName() + vt_name);
+		item.pszText = StringToWchar_t(sp->getVirusName());
 
 		TV_INSERTSTRUCT insert;
 		insert.hParent = TVI_ROOT;
@@ -232,12 +249,12 @@ int InitTreeControl(T *uidatas)
 		insert.item = item;
 
 		Selected = TreeView_InsertItem(m_tree, &insert);
-		for (std::multimap<std::string, ScanInfo*>::iterator iter = sp->get_scans().begin(); iter != sp->get_scans().end(); ++iter) //遍历json成员
+		for (std::multimap<std::string, std::string>::iterator iter = sp->getJsonsInfo().begin(); iter != sp->getJsonsInfo().end(); ++iter) //遍历json成员
 		{
 			std::string str;
 			str.append(iter->first);
 			str.append(" : ");
-			str.append(iter->second->get_result());
+			str.append(iter->second);
 			wchar_t * wszUtf8 = StringToWchar_t(str);
 
 			TV_ITEM item1;
@@ -286,24 +303,86 @@ void performActions(HWND hwnd, WCHAR* txContent)
 	{
 	case 1:
 		{
-			VtApi *vt_api = new VtApi();
-			bool isSuccess = vt_api->VtReport(WstringToString(txContent).c_str());
-			if (isSuccess)
+			std::vector<std::string> reportdata;
+			bool m_erro = is_report_valid(WstringToString(txContent), &reportdata);
+			if (m_erro)
 			{
-				char* testjson = vt_api->getReportJson();
-				OutputDebugStringA(testjson);
-				VtParse* vtParse = new VtParse();
-				vtParse->readandparseJsonFromFile(testjson);
-
+				VtApi *vt_api = new VtApi();
+				// 清除m_tree的界面
 				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
 				TreeView_DeleteAllItems(m_tree);
-				InitTreeControl(vtParse);
-				delete vtParse;
+
+				for (auto reportdata_index : reportdata)
+				{
+					bool isSuccess = vt_api->VtReport(reportdata_index.c_str());
+					if (isSuccess)
+					{
+						char* testjson = vt_api->getReportJson();
+						VtParse* vtParse = new VtParse();
+						vtParse->readandparseJsonFromFile(testjson);
+
+						InitTreeControl(vtParse);
+
+						delete vtParse;
+						vt_api->cleanChunk();
+					}
+				}
+				delete vt_api;
 			}
-			delete vt_api;
+			else
+			{
+				MessageBox(hwnd, L"不匹配", NULL, 0);
+			}
+			// 唤醒执行 按钮
+			EnableWindow(GetDlgItem(hwnd, IDOK), true);
 		}
 		break;
 	case 2:
+		{
+			bool m_apk = is_apk_valid(WstringToString(txContent));
+			if (m_apk)
+			{
+				VtApi *vt_api = new VtApi();
+				// 清除m_tree的界面
+				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+				TreeView_DeleteAllItems(m_tree);
+
+				bool isSuccess = vt_api->VtScanFile(WstringToString(txContent).c_str());
+				if (isSuccess)
+				{
+					char* filescanjson = vt_api->getReportJson();
+					VtParse* vtParse = new VtParse();
+					vtParse->readandparseJsonFromFile(filescanjson);
+					vt_api->cleanChunk();
+					
+					for (auto sp : vtParse->getInfos())
+					{
+						vt_api->VtRescanFile(sp->get_resource().c_str());
+						vt_api->cleanChunk();
+						
+						bool isSuccess = vt_api->VtReport(sp->get_resource().c_str());
+						if (isSuccess)
+						{
+							char* reportjson = vt_api->getReportJson();
+							vtParse->readandparseJsonFromFile(reportjson);
+
+							InitTreeControl(vtParse);
+
+							delete vtParse;
+							vt_api->cleanChunk();
+						}
+					}
+				}
+				
+				delete vt_api;
+			}
+			else
+			{
+				MessageBox(hwnd, L"不匹配", NULL, 0);
+			}
+			// 唤醒执行 按钮
+			EnableWindow(GetDlgItem(hwnd, IDOK), true);
+		}
 		break;
 	case 3:
 		break;
@@ -319,9 +398,15 @@ void performActions(HWND hwnd, WCHAR* txContent)
 			TreeView_DeleteAllItems(m_tree);
 			InitTreeControl(sophosParse);
 			delete sophosParse;
+
+			// 唤醒执行 按钮
+			EnableWindow(GetDlgItem(hwnd, IDOK), true);
 		}
 		break;
 	default:
+		MessageBox(hwnd, L"请选择类型", NULL, 0);
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
 		break;
 	}
 

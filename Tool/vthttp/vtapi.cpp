@@ -8,7 +8,11 @@ VtApi::VtApi()
 
 VtApi::~VtApi()
 {
-	free(chunk.memory);
+	if (chunk.memory)
+	{
+		free(chunk.memory);
+		chunk.memory = NULL;
+	}
 	chunk.size = 0;
 }
 
@@ -31,7 +35,7 @@ size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream)
 	return realsize;
 }
 
-bool VtApi::VtScanFile(char * filepath)
+bool VtApi::VtScanFile(const char * filepath)
 {
 	bool isSuccess = false;
 
@@ -80,9 +84,12 @@ bool VtApi::VtScanFile(char * filepath)
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header_buf);
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
 		//通过write_data方法将联网返回数据写入到data中
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, chunk);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
@@ -113,7 +120,7 @@ bool VtApi::VtScanFile(char * filepath)
 	return isSuccess;
 }
 
-bool VtApi::VtRescanFile(char * sourses)
+bool VtApi::VtRescanFile(const char * sourses)
 {
 	bool isSuccess = false;
 
@@ -155,9 +162,12 @@ bool VtApi::VtRescanFile(char * sourses)
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header_buf);
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
 		//通过write_data方法将联网返回数据写入到data中
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteData);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, chunk);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
@@ -271,4 +281,11 @@ bool VtApi::VtReport(const char * sourses)
 char* VtApi::getReportJson()
 {
 	return this->chunk.memory;
+}
+
+void VtApi::cleanChunk()
+{
+	free(chunk.memory);
+	chunk.memory = NULL;
+	chunk.size = 0;
 }

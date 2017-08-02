@@ -21,10 +21,11 @@ public:
 
 	//virtual size_t WriteData(void* ptr, size_t size, size_t nmemb, void* stream);
 
-	bool VtScanFile(char* filepath);
-	bool VtRescanFile(char* sourses);
+	bool VtScanFile(const char* filepath);
+	bool VtRescanFile(const char* sourses);
 	bool VtReport(const char* sourses);
 	char* getReportJson();
+	void cleanChunk();
 
 protected:
 	WriteData_bc callback;
