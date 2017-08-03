@@ -8,9 +8,10 @@
 
 #include "sophos\sophosparse.h"
 #include "FileFunction.h"
-
 #include "vthttp\vtapi.h"
 #include "virustotal\vtparse.h"
+#include "apkinfo/apkinfo.h"
+
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
@@ -36,6 +37,7 @@ WCHAR fileName[MAX_PATH];													// 获取输入框内容
 //2:APK
 //3:avt邮件
 //4:sophos
+//5:APKINFO
 UINT m_type = 0;
 
 int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nShow)
@@ -307,7 +309,10 @@ void performActions(HWND hwnd, WCHAR* txContent)
 		m_type = 3;
 	if (IsDlgButtonChecked(hwnd, IDC_SOPHOS) == BST_CHECKED)
 		m_type = 4;
+	if (IsDlgButtonChecked(hwnd, IDC_APKINFO) == BST_CHECKED)
+		m_type = 5;
 
+	SendMessage(m_progress, PBM_SETPOS, 10, 0L);
 	switch (m_type)
 	{
 	case 1:
@@ -330,13 +335,14 @@ void performActions(HWND hwnd, WCHAR* txContent)
 						VtParse* vtParse = new VtParse();
 						vtParse->readandparseJsonFromFile(testjson);
 
-						InitTreeControl(vtParse);
+						InitTreeControl(vtParse);						
 
 						delete vtParse;
 						vt_api->cleanChunk();
 					}
 				}
 				delete vt_api;
+				SendMessage(m_progress, PBM_SETPOS, 100, 0L);
 			}
 			else
 			{
@@ -409,6 +415,29 @@ void performActions(HWND hwnd, WCHAR* txContent)
 			InitTreeControl(sophosParse);
 			delete sophosParse;
 
+			SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+			// 唤醒执行 按钮
+			EnableWindow(GetDlgItem(hwnd, IDOK), true);
+		}
+		break;
+	case 5:
+		{
+			
+			CSHA1 sha1;
+			
+			sha1.HashFile(txContent);
+			sha1.Final();
+			char chSha1[41];
+			sha1.GetHashStr(chSha1);
+			OutputDebugStringA(chSha1);
+			OutputDebugStringA("\n");
+
+			MD5 md5;
+			md5.md5_file(WstringToString(txContent).c_str());
+			std::string result = md5.md5();
+			OutputDebugStringA(result.c_str());
+
+			SendMessage(m_progress, PBM_SETPOS, 100, 0L);
 			// 唤醒执行 按钮
 			EnableWindow(GetDlgItem(hwnd, IDOK), true);
 		}

@@ -40,6 +40,12 @@
     <Filter Include="源文件\virustotal">
       <UniqueIdentifier>{6758d161-393d-4c2c-be81-705e8166d1eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\apkinfo">
+      <UniqueIdentifier>{260091d4-1d4d-4f52-9edc-3036a49e93b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\apkinfo">
+      <UniqueIdentifier>{f28de465-a188-4364-b615-bb452a58ce3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -71,6 +77,15 @@
     </ClCompile>
     <ClCompile Include="virustotal\vtparse.cpp">
       <Filter>源文件\virustotal</Filter>
+    </ClCompile>
+    <ClCompile Include="apkinfo\md5.cpp">
+      <Filter>源文件\apkinfo</Filter>
+    </ClCompile>
+    <ClCompile Include="apkinfo\sha1.cpp">
+      <Filter>源文件\apkinfo</Filter>
+    </ClCompile>
+    <ClCompile Include="apkinfo\apkinfo.cpp">
+      <Filter>源文件\apkinfo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +166,15 @@
     </ClInclude>
     <ClInclude Include="include\curl\typecheck-gcc.h">
       <Filter>头文件\libcurl</Filter>
+    </ClInclude>
+    <ClInclude Include="apkinfo\md5.h">
+      <Filter>头文件\apkinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="apkinfo\sha1.h">
+      <Filter>头文件\apkinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="apkinfo\apkinfo.h">
+      <Filter>头文件\apkinfo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

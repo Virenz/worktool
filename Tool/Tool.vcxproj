@@ -151,6 +151,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="apkinfo\apkinfo.cpp" />
+    <ClCompile Include="apkinfo\md5.cpp" />
+    <ClCompile Include="apkinfo\sha1.cpp" />
     <ClCompile Include="include\json_reader.cpp" />
     <ClCompile Include="include\json_value.cpp" />
     <ClCompile Include="include\json_writer.cpp" />
@@ -163,6 +166,9 @@
     <ClCompile Include="vthttp\vtapi.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="apkinfo\apkinfo.h" />
+    <ClInclude Include="apkinfo\md5.h" />
+    <ClInclude Include="apkinfo\sha1.h" />
     <ClInclude Include="FileFunction.h" />
     <ClInclude Include="include\curl\curl.h" />
     <ClInclude Include="include\curl\curlbuild.h" />
