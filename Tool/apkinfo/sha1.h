@@ -245,7 +245,7 @@ public:
 
 #ifdef SHA1_UTILITY_FUNCTIONS
 	// Hash in file contents
-	bool HashFile(const TCHAR* tszFileName);
+	bool HashFile(const char* tszFileName);
 #endif
 
 	// Finalize hash; call it before using ReportHash(Stl)
@@ -262,7 +262,7 @@ public:
 
 	// Get the raw message digest (20 bytes)
 	bool GetHash(UINT_8* pbDest20) const;
-	bool GetHashStr(char* pbDest20) const;
+	std::string GetHashStr() const;
 
 private:
 	// Private SHA-1 transformation

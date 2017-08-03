@@ -139,11 +139,11 @@ void CSHA1::Update(const UINT_8* pbData, UINT_32 uLen)
 }
 
 #ifdef SHA1_UTILITY_FUNCTIONS
-bool CSHA1::HashFile(const TCHAR* tszFileName)
+bool CSHA1::HashFile(const char* tszFileName)
 {
 	if (tszFileName == NULL) return false;
 
-	FILE* fpIn = _tfopen(tszFileName, _T("rb"));
+	FILE* fpIn = fopen(tszFileName, "rb");
 	if (fpIn == NULL) return false;
 
 	UINT_8* pbData = new UINT_8[SHA1_MAX_FILE_BUFFER];
@@ -253,14 +253,15 @@ bool CSHA1::GetHash(UINT_8* pbDest20) const
 	return true;
 }
 
-bool CSHA1::GetHashStr(char* pbDest20) const
+std::string CSHA1::GetHashStr() const
 {
-	if (pbDest20 == NULL) return false;
-	memcpy(pbDest20, m_digest, 20);
+	char *p = new char[41];
 	for (int i = 0; i < 20; i++)
-		sprintf_s(pbDest20 + i * 2, 4, "%02x", m_digest[i]);
-	pbDest20[40] = 0;
-	return true;
+		sprintf_s(p + i * 2, 4, "%02x", m_digest[i]);
+	p[40] = 0;
+	std::string str1(p);
+	delete[] p;
+	return str1;
 }
 
 #pragma warning(pop)

@@ -1,17 +1,17 @@
 #pragma once
-#include "apkinfo.h"
-#include "sha1.h"
-#include "md5.h"
+#include <map>
+#include <string>
 
 class ApkInfo
 {
 public:
-	ApkInfo();
-	~ApkInfo();
+	void setVirusName(std::string virusname);
+	std::string getVirusName();
 
-	int GetFileMD5(const char* filePath, char* strMD5);
-	int GetFileSHA1(const wchar_t * filePath, char* strSHA1);
+	void setJsonsInfo(const std::string& key, std::string& value);
+	std::multimap<const std::string, std::string>& getJsonsInfo();
 
 private:
-
+	std::multimap<const std::string, std::string> jsonsmap;
+	std::string virusname;
 };

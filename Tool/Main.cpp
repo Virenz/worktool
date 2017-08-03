@@ -10,8 +10,7 @@
 #include "FileFunction.h"
 #include "vthttp\vtapi.h"
 #include "virustotal\vtparse.h"
-#include "apkinfo/apkinfo.h"
-
+#include "apkinfo\apkparse.h"
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
@@ -44,7 +43,7 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 {
 	hgInst = hThisApp;
 	//DialogBox(hgInst, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
-	HWND hdlg = CreateDialog(hThisApp, MAKEINTRESOURCE(IDD_DIALOG1), GetDesktopWindow(), (DLGPROC)DlgProc);
+	HWND hdlg = CreateDialog(hThisApp, MAKEINTRESOURCE(IDD_DIALOG1), NULL, (DLGPROC)DlgProc);
 	m_progress = GetDlgItem(hdlg, IDC_PROGRESSEXEC);
 	DragAcceptFiles(hdlg,TRUE);
 	if (!hdlg)
@@ -52,6 +51,7 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 		return 0;
 	}
 	ShowWindow(hdlg, SW_SHOW);
+
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -68,20 +68,26 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_INITDIALOG:
+	{
 		// 设置对话框的图标 
 		SetWindowText(hDlg, title);
 		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hgInst, MAKEINTRESOURCE(IDI_ICON1)));
 		return 0;
+	}
 	case WM_SYSCOMMAND:
+	{
 		if (wParam == SC_CLOSE)
 		{
 			PostQuitMessage(0);//退出     
 		}
 		return 0;
+	}
 	case WM_KEYDOWN:
-		if ('A' == wParam)//字母键的虚拟键码为大写字母的ASCII码 
+	{
+		switch (LOWORD(wParam))
 		{
-			int iState = GetAsyncKeyState(VK_CONTROL);
+		case VK_CONTROL:
+			int iState = GetKeyState('a');
 			if (iState < 0)
 			{
 				Edit_SetSel(GetDlgItem(hDlg, IDC_FILEPATH), 0, -1);
@@ -93,6 +99,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
+	}
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -233,7 +240,6 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 		}
 	case IDOK:
 		{
-			
 			DWORD dwError = GetDlgItemText(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
 			std::thread action(performActions, hwnd, fileName);
 			action.detach();
@@ -422,20 +428,14 @@ void performActions(HWND hwnd, WCHAR* txContent)
 		break;
 	case 5:
 		{
-			
-			CSHA1 sha1;
-			
-			sha1.HashFile(txContent);
-			sha1.Final();
-			char chSha1[41];
-			sha1.GetHashStr(chSha1);
-			OutputDebugStringA(chSha1);
-			OutputDebugStringA("\n");
+			ApkParse* apkParse = new ApkParse();
+			apkParse->readandparseJsonFromFile(WstringToString(txContent).c_str());
 
-			MD5 md5;
-			md5.md5_file(WstringToString(txContent).c_str());
-			std::string result = md5.md5();
-			OutputDebugStringA(result.c_str());
+			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+			TreeView_DeleteAllItems(m_tree);
+			InitTreeControl(apkParse);
+
+			delete apkParse;
 
 			SendMessage(m_progress, PBM_SETPOS, 100, 0L);
 			// 唤醒执行 按钮

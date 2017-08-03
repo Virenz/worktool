@@ -87,6 +87,9 @@
     <ClCompile Include="apkinfo\apkinfo.cpp">
       <Filter>源文件\apkinfo</Filter>
     </ClCompile>
+    <ClCompile Include="apkinfo\apkparse.cpp">
+      <Filter>源文件\apkinfo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -174,6 +177,9 @@
       <Filter>头文件\apkinfo</Filter>
     </ClInclude>
     <ClInclude Include="apkinfo\apkinfo.h">
+      <Filter>头文件\apkinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="apkinfo\apkparse.h">
       <Filter>头文件\apkinfo</Filter>
     </ClInclude>
   </ItemGroup>
