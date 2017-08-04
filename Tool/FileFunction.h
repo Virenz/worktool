@@ -144,6 +144,22 @@ std::string WstringToString(const std::wstring str)
 //}
 
 // 正则表达式匹配sha1/md5/sha256
+bool is_reports_valid(const std::string& reports)
+{
+	const std::regex pattern("[a-z0-9]{40}|[a-z0-9]{32}|[a-z0-9]{64}");
+	std::match_results<std::string::const_iterator> result;
+	bool valid = std::regex_match(reports, result, pattern);
+	//此处result参数可有可无，result是一个字符串数组，用来存储正则表达式里面括号的内容。
+	if (valid && (result.length()>0))
+	{
+		for (int i = 0; i<result.length(); i++)
+		{
+			printf("%s", result[i]);
+		}
+	}
+	return valid;
+}
+
 bool is_report_valid(const std::string& data, std::vector<std::string> *reportdata)
 {
 	if (data.empty())

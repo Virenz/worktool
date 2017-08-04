@@ -18,7 +18,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
 VOID OnDropFiles(HWND hwnd, HDROP hDropInfo);								// 实现文件拖动进入TEXT框
-void performActions(HWND hwnd, WCHAR* txContent);							// 获取单选框和编辑框进行对应的操作
+void performActions(HWND hwnd);							// 获取单选框和编辑框进行对应的操作
 
 template<class T>
 int InitTreeControl(T *uidatas);											// 进行tree布局显示数据
@@ -31,7 +31,6 @@ TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
 
 TCHAR title[20] = L"wlc-tool v0.1";											// 设置标题 
-WCHAR fileName[MAX_PATH];													// 获取输入框内容
 
 //对应
 //1:SHA1/MD5/SHA256
@@ -247,8 +246,7 @@ void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify) {
 		}
 	case IDOK:
 		{
-			DWORD dwError = GetDlgItemText(hwnd, IDC_FILEPATH, fileName, MAX_PATH);
-			std::thread action(performActions, hwnd, fileName);
+			std::thread action(performActions, hwnd);
 			action.detach();
 			//performActions(hwnd, fileName);
 			break;
@@ -312,16 +310,8 @@ VOID OnDropFiles(HWND hwnd, HDROP hDropInfo)
 	DragFinish(hDropInfo);
 }
 
-void performActions(HWND hwnd, WCHAR* txContent)
+void performActions(HWND hwnd)
 {
-	if (wcslen(txContent) == 0)						// 判断输出文件为空，则不执行
-	{
-		MessageBox(hwnd, L"输出文件为空", NULL, 0);
-		// 唤醒执行 按钮
-		EnableWindow(GetDlgItem(hwnd, IDOK), true);
-		return;
-	}
-
 	if (IsDlgButtonChecked(hwnd, IDC_MD) == BST_CHECKED)
 		m_type = 1;
 	if (IsDlgButtonChecked(hwnd, IDC_APK) == BST_CHECKED)
@@ -333,130 +323,167 @@ void performActions(HWND hwnd, WCHAR* txContent)
 	if (IsDlgButtonChecked(hwnd, IDC_APKINFO) == BST_CHECKED)
 		m_type = 5;
 
-	SendMessage(m_progress, PBM_SETPOS, 10, 0L);
+	HWND editText = GetDlgItem(hwnd, IDC_FILEPATH);
+	// 复制某一行到缓冲区; 
+	WCHAR txContent[MAX_PATH];
+	
 	switch (m_type)
 	{
 	case 1:
+	{
+		std::vector<std::string> reportdata;
+		std::string strbuf;
+		bool m_erro;
+		// 获得编辑器的行数;  
+		int iCount = Edit_GetLineCount(editText);
+		int index;
+		for (index = 0; index < iCount; index++)
 		{
-			std::vector<std::string> reportdata;
-			bool m_erro = is_report_valid(WstringToString(txContent), &reportdata);
+			memset(txContent, 0, MAX_PATH);
+			int iLength = Edit_GetLine(editText, index, txContent, MAX_PATH);
+			txContent[iLength] = '\0';
+
+			m_erro = is_reports_valid(WstringToString(txContent));
 			if (m_erro)
 			{
-				VtApi *vt_api = new VtApi();
-				// 清除m_tree的界面
-				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-				TreeView_DeleteAllItems(m_tree);
-
-				for (auto reportdata_index : reportdata)
+				if (index % 4 == 0 && index != 0)
 				{
-					bool isSuccess = vt_api->VtReport(reportdata_index.c_str());
-					if (isSuccess)
-					{
-						char* testjson = vt_api->getReportJson();
-						VtParse* vtParse = new VtParse();
-						vtParse->readandparseJsonFromFile(testjson);
-
-						InitTreeControl(vtParse);						
-
-						delete vtParse;
-						vt_api->cleanChunk();
-					}
+					reportdata.push_back(strbuf.c_str());
+					strbuf.clear();
 				}
-				delete vt_api;
-				SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+				strbuf.append(WstringToString(txContent));
+				strbuf.append(",");
 			}
 			else
 			{
 				MessageBox(hwnd, L"非SHA1/MD5/SHA256", NULL, 0);
 			}
+		}
+		if (index == 0)
+		{
+			MessageBox(hwnd, L"输入文件为空", NULL, 0);
 			// 唤醒执行 按钮
 			EnableWindow(GetDlgItem(hwnd, IDOK), true);
+			return;
 		}
-		break;
-	case 2:
+		else
 		{
-			int m_apk = is_apk_valid(WstringToString(txContent));
-			if (m_apk > 0)
+			reportdata.push_back(strbuf.c_str());
+		}
+
+		VtApi *vt_api = new VtApi();
+		// 清除m_tree的界面
+		m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+		TreeView_DeleteAllItems(m_tree);
+
+		for (auto reportdata_index : reportdata)
+		{
+			bool isSuccess = vt_api->VtReport(reportdata_index.c_str());
+			if (isSuccess)
 			{
-				VtApi *vt_api = new VtApi();
-				// 清除m_tree的界面
-				m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-				TreeView_DeleteAllItems(m_tree);
+				char* testjson = vt_api->getReportJson();
+				VtParse* vtParse = new VtParse();
+				vtParse->readandparseJsonFromFile(testjson);
 
-				bool isSuccess = vt_api->VtScanFile(WstringToString(txContent).c_str(), m_progress);
-				if (isSuccess)
+				InitTreeControl(vtParse);
+
+				delete vtParse;
+				vt_api->cleanChunk();
+			}
+		}
+		delete vt_api;
+		SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+		
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
+	}
+	break;
+	case 2:
+	{
+		Edit_GetText(editText, txContent, MAX_PATH);
+		int m_apk = is_apk_valid(WstringToString(txContent));
+		if (m_apk > 0)
+		{
+			VtApi *vt_api = new VtApi();
+			// 清除m_tree的界面
+			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+			TreeView_DeleteAllItems(m_tree);
+
+			bool isSuccess = vt_api->VtScanFile(WstringToString(txContent).c_str(), m_progress);
+			if (isSuccess)
+			{
+				char* filescanjson = vt_api->getReportJson();
+				VtParse* vtParse = new VtParse();
+				vtParse->readandparseJsonFromFile(filescanjson);
+				vt_api->cleanChunk();
+
+				for (auto sp : vtParse->getInfos())
 				{
-					char* filescanjson = vt_api->getReportJson();
-					VtParse* vtParse = new VtParse();
-					vtParse->readandparseJsonFromFile(filescanjson);
+					vt_api->VtRescanFile(sp->get_resource().c_str());
 					vt_api->cleanChunk();
-					
-					for (auto sp : vtParse->getInfos())
+
+					bool isSuccess = vt_api->VtReport(sp->get_resource().c_str());
+					if (isSuccess)
 					{
-						vt_api->VtRescanFile(sp->get_resource().c_str());
+						char* reportjson = vt_api->getReportJson();
+						vtParse->readandparseJsonFromFile(reportjson);
+
+						InitTreeControl(vtParse);
+						SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+
+						delete vtParse;
 						vt_api->cleanChunk();
-						
-						bool isSuccess = vt_api->VtReport(sp->get_resource().c_str());
-						if (isSuccess)
-						{
-							char* reportjson = vt_api->getReportJson();
-							vtParse->readandparseJsonFromFile(reportjson);
-
-							InitTreeControl(vtParse);
-							SendMessage(m_progress, PBM_SETPOS, 100, 0L);
-
-							delete vtParse;
-							vt_api->cleanChunk();
-						}
 					}
 				}
-				
-				delete vt_api;
 			}
-			else
-			{
-				MessageBox(hwnd, L"非apk后缀文件", NULL, 0);
-			}
-			// 唤醒执行 按钮
-			EnableWindow(GetDlgItem(hwnd, IDOK), true);
+			delete vt_api;
 		}
-		break;
+		else
+		{
+			MessageBox(hwnd, L"非apk后缀文件", NULL, 0);
+		}
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
+	}
+	break;
 	case 3:
 		break;
 	case 4:
-		{
-			char* filedata = (char*)getFileInfo(txContent);
-			SophosParse* sophosParse = new SophosParse();
-			sophosParse->readandparseJsonFromFile(filedata);
+	{
+		Edit_GetText(editText, txContent, MAX_PATH);
+		char* filedata = (char*)getFileInfo(txContent);
+		SophosParse* sophosParse = new SophosParse();
+		sophosParse->readandparseJsonFromFile(filedata);
 
-			UnmapViewOfFile(filedata);
+		UnmapViewOfFile(filedata);
 
-			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-			TreeView_DeleteAllItems(m_tree);
-			InitTreeControl(sophosParse);
-			delete sophosParse;
+		m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+		TreeView_DeleteAllItems(m_tree);
+		InitTreeControl(sophosParse);
+		delete sophosParse;
 
-			SendMessage(m_progress, PBM_SETPOS, 100, 0L);
-			// 唤醒执行 按钮
-			EnableWindow(GetDlgItem(hwnd, IDOK), true);
-		}
-		break;
+		SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
+	}
+	break;
 	case 5:
-		{
-			ApkParse* apkParse = new ApkParse();
-			apkParse->readandparseJsonFromFile(WstringToString(txContent).c_str());
+	{
+		Edit_GetText(editText, txContent, MAX_PATH);
+		ApkParse* apkParse = new ApkParse();
+		apkParse->readandparseJsonFromFile(WstringToString(txContent).c_str());
 
-			m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-			TreeView_DeleteAllItems(m_tree);
-			InitTreeControl(apkParse);
+		m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+		TreeView_DeleteAllItems(m_tree);
+		InitTreeControl(apkParse);
 
-			delete apkParse;
+		delete apkParse;
 
-			SendMessage(m_progress, PBM_SETPOS, 100, 0L);
-			// 唤醒执行 按钮
-			EnableWindow(GetDlgItem(hwnd, IDOK), true);
-		}
-		break;
+		SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
+	}
+	break;
 	default:
 		MessageBox(hwnd, L"请选择类型", NULL, 0);
 		// 唤醒执行 按钮

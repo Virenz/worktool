@@ -278,7 +278,7 @@ bool VtApi::VtReport(const char * sourses)
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
 		/* Perform the request, res will get the return code */
-		
+
 		res = curl_easy_perform(curl);
 		/* Check for errors */
 		if (res != CURLE_OK)
@@ -294,7 +294,7 @@ bool VtApi::VtReport(const char * sourses)
 			{
 				printf("%s memory retrieved\n", chunk.memory);
 				isSuccess = true;
-			}
+			}	
 		}
 
 		/* always cleanup */
