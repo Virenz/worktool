@@ -1,4 +1,5 @@
-﻿#include <Windows.h>
+﻿#pragma once
+#include <Windows.h>
 #include <windowsx.h>
 #include <WinUser.h>
 #include "resource.h"
@@ -11,8 +12,6 @@
 #include "vthttp\vtapi.h"
 #include "virustotal\vtparse.h"
 #include "apkinfo\apkparse.h"
-
-
 
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);

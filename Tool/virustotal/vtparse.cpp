@@ -53,13 +53,14 @@ int VtParse::readandparseJsonFromFile(char* vtdatas)
 					vtInfo->setVirusName(root.get("sha1", "null").asString());
 				}
 				
-				vtInfo->set_resource(root.get("resource", "null").asString());
+				vtInfo->set_resource(root.get("sha1", "null").asString());
 			}
 			else
 			{
 				// 获取resource：no found
-				vtInfo->setVirusName(root.get("verbose_msg", "null").asString());
+				vtInfo->setVirusName(root.get("resource", "null").asString());
 				vtInfo->set_resource(root.get("resource", "null").asString());
+				vtInfo->setJsonsInfo(std::string("verbose_msg"), root.get("verbose_msg", "null").asString());
 			}
 			
 			vtInfos.push_back(vtInfo);
@@ -95,13 +96,14 @@ int VtParse::readandparseJsonFromFile(char* vtdatas)
 						vtInfo->setVirusName(root[i].get("sha1", "null").asString());
 					}
 					
-					vtInfo->set_resource(root[i].get("resource", "null").asString());
+					vtInfo->set_resource(root[i].get("sha1", "null").asString());
 				}
 				else
 				{
 					// 获取resource：no found
-					vtInfo->setVirusName(root[i].get("verbose_msg", "null").asString());
+					vtInfo->setVirusName(root[i].get("resource", "null").asString());
 					vtInfo->set_resource(root[i].get("resource", "null").asString());
+					vtInfo->setJsonsInfo(std::string("verbose_msg"), root[i].get("verbose_msg", "null").asString());
 				}
 				vtInfos.push_back(vtInfo);
 			}
