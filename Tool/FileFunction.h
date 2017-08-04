@@ -112,9 +112,45 @@ std::string WstringToString(const std::wstring str)
 	return str1;
 }
 
+// 跨平台string和wstring转换
+// wstring => string
+//std::string WString2String(const std::wstring& ws)
+//{
+//	std::string strLocale = setlocale(LC_ALL, "");
+//	const wchar_t* wchSrc = ws.c_str();
+//	size_t nDestSize = wcstombs(NULL, wchSrc, 0) + 1;
+//	char *chDest = new char[nDestSize];
+//	memset(chDest, 0, nDestSize);
+//	wcstombs(chDest, wchSrc, nDestSize);
+//	std::string strResult = chDest;
+//	delete[]chDest;
+//	setlocale(LC_ALL, strLocale.c_str());
+//	return strResult;
+//}
+//
+//// string => wstring
+//std::wstring String2WString(const std::string& s)
+//{
+//	std::string strLocale = setlocale(LC_ALL, "");
+//	const char* chSrc = s.c_str();
+//	size_t nDestSize = mbstowcs(NULL, chSrc, 0) + 1;
+//	wchar_t* wchDest = new wchar_t[nDestSize];
+//	wmemset(wchDest, 0, nDestSize);
+//	mbstowcs(wchDest, chSrc, nDestSize);
+//	std::wstring wstrResult = wchDest;
+//	delete[]wchDest;
+//	setlocale(LC_ALL, strLocale.c_str());
+//	return wstrResult;
+//}
+
 // 正则表达式匹配sha1/md5/sha256
 bool is_report_valid(const std::string& data, std::vector<std::string> *reportdata)
 {
+	if (data.empty())
+	{
+		return false;
+	}
+
 	int index = 0;
 	std::string strbuf;
 	const std::regex pattern("[a-z0-9]{40}");
@@ -163,6 +199,11 @@ bool is_report_valid(const std::string& data, std::vector<std::string> *reportda
 // 匹配apk文件
 int is_apk_valid(const std::string& data)
 {
+	if (data.empty())
+	{
+		return -1;
+	}
+
 	int index = data.find("apk", 0);
 	return index;
 }

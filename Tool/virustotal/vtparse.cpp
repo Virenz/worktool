@@ -58,7 +58,7 @@ int VtParse::readandparseJsonFromFile(char* vtdatas)
 			else
 			{
 				// 获取resource：no found
-				vtInfo->setVirusName(root.get("resource", "null").asString() + ":no found");
+				vtInfo->setVirusName(root.get("verbose_msg", "null").asString());
 				vtInfo->set_resource(root.get("resource", "null").asString());
 			}
 			
@@ -100,7 +100,7 @@ int VtParse::readandparseJsonFromFile(char* vtdatas)
 				else
 				{
 					// 获取resource：no found
-					vtInfo->setVirusName(root[i].get("resource", "null").asString() + ":no found");
+					vtInfo->setVirusName(root[i].get("verbose_msg", "null").asString());
 					vtInfo->set_resource(root[i].get("resource", "null").asString());
 				}
 				vtInfos.push_back(vtInfo);

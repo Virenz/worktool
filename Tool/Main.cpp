@@ -12,6 +12,9 @@
 #include "virustotal\vtparse.h"
 #include "apkinfo\apkparse.h"
 
+
+
+
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
@@ -44,6 +47,7 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 	hgInst = hThisApp;
 	//DialogBox(hgInst, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
 	HWND hdlg = CreateDialog(hThisApp, MAKEINTRESOURCE(IDD_DIALOG1), NULL, (DLGPROC)DlgProc);
+	
 	m_progress = GetDlgItem(hdlg, IDC_PROGRESSEXEC);
 	DragAcceptFiles(hdlg,TRUE);
 	if (!hdlg)
@@ -52,12 +56,16 @@ int WINAPI WinMain(HINSTANCE hThisApp, HINSTANCE hPrevApp, LPSTR lpCmd, int nSho
 	}
 	ShowWindow(hdlg, SW_SHOW);
 
-
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
+		if (msg.message == WM_KEYDOWN && GetKeyState('A') && GetKeyState(VK_CONTROL))
+		{
+			Edit_SetSel(GetDlgItem(hdlg, IDC_FILEPATH), 0, -1);
+		}
+
 		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DispatchMessage(&msg);	
 	}
 
 	return 0;
@@ -307,6 +315,14 @@ VOID OnDropFiles(HWND hwnd, HDROP hDropInfo)
 
 void performActions(HWND hwnd, WCHAR* txContent)
 {
+	if (wcslen(txContent) == 0)						// 判断输出文件为空，则不执行
+	{
+		MessageBox(hwnd, L"输出文件为空", NULL, 0);
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
+		return;
+	}
+
 	if (IsDlgButtonChecked(hwnd, IDC_MD) == BST_CHECKED)
 		m_type = 1;
 	if (IsDlgButtonChecked(hwnd, IDC_APK) == BST_CHECKED)
@@ -449,16 +465,6 @@ void performActions(HWND hwnd, WCHAR* txContent)
 		break;
 	}
 
-	
-	/*char* filedata = (char*)getFileInfo(fileName);
-	sophosParse = new SophosParse();
-	sophosParse->readandparseJsonFromFile(filedata);
-
-	UnmapViewOfFile(filedata);
-
-	m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
-	TreeView_DeleteAllItems(m_tree);
-	InitTreeControl();*/
 	/*OPENFILENAME  ofn;
 	myFileDialogConfig(ofn, hwnd);
 	if (GetOpenFileName(&ofn))
@@ -479,44 +485,3 @@ void performActions(HWND hwnd, WCHAR* txContent)
 	}
 	}*/
 }
-
-
-//std::vector<SophosInfo*>& sophosInfos = sophosParse->getSophosInfos();
-//for (SophosInfo* sp : sophosInfos)
-//{
-//	TV_ITEM item;
-//	item.mask = TVIF_TEXT | TVIF_PARAM;
-//	item.cchTextMax = 2;
-//	item.pszText = StringToWchar_t(sp->getVirusName());
-//
-//	TV_INSERTSTRUCT insert;
-//	insert.hParent = TVI_ROOT;
-//	insert.hInsertAfter = TVI_LAST;
-//	insert.item = item;
-//
-//	Selected = TreeView_InsertItem(m_tree, &insert);
-//	for (std::multimap<std::string, std::string>::iterator iter = sp->getJsonsInfo().begin(); iter != sp->getJsonsInfo().end(); ++iter) //遍历json成员
-//	{
-//		std::string str;
-//		str.append(iter->first);
-//		str.append(" : ");
-//		str.append(iter->second);
-//		wchar_t * wszUtf8 = StringToWchar_t(str);
-//
-//		TV_ITEM item1;
-//		item1.mask = TVIF_TEXT | TVIF_PARAM | TVS_HASLINES | TVS_LINESATROOT;
-//		item1.cchTextMax = 2;
-//		item1.pszText = wszUtf8;
-//
-//		TV_INSERTSTRUCT insert1;
-//		insert1.hParent = Selected;
-//		insert1.hInsertAfter = TVI_LAST;
-//		insert1.item = item1;
-//
-//		HTREEITEM root2 = TreeView_InsertItem(m_tree, &insert1);
-//
-//		delete[] wszUtf8;
-//	}
-//
-//}
-//delete sophosParse;

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef TOOL_APKPARSE_H
+#define TOOL_APKPARSE_H
+
 #include "apkinfo.h"
 #include <string>
 #include <vector>
@@ -17,3 +19,4 @@ public:
 private:
 	std::vector<ApkInfo*> apkInfos;
 };
+#endif 
