@@ -22,6 +22,10 @@ int ApkParse::readandparseJsonFromFile(const char* filedata)
 	std::string result = md5.md5();
 	apkinfo->setJsonsInfo("md5", result);
 
+	/*CRC32 crc32;
+	std::string str_crc32 = crc32.GetCRC32FromFile(filedata);
+	apkinfo->setJsonsInfo("crc32", str_crc32);*/
+
 	this->apkInfos.push_back(apkinfo);
 	
 	return 0;

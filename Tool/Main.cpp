@@ -354,10 +354,6 @@ void performActions(HWND hwnd)
 				strbuf.append(WstringToString(txContent));
 				strbuf.append(",");
 			}
-			else
-			{
-				MessageBox(hwnd, L"非SHA1/MD5/SHA256", NULL, 0);
-			}
 		}
 		if (index == 0)
 		{
@@ -369,6 +365,14 @@ void performActions(HWND hwnd)
 		else
 		{
 			reportdata.push_back(strbuf.c_str());
+		}
+
+		if (reportdata.empty())
+		{
+			MessageBox(hwnd, L"非SHA1/MD5/SHA256", NULL, 0);
+			// 唤醒执行 按钮
+			EnableWindow(GetDlgItem(hwnd, IDOK), true);
+			return;
 		}
 
 		VtApi *vt_api = new VtApi();
