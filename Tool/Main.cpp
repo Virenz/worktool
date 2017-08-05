@@ -1,5 +1,4 @@
-﻿#pragma once
-#include <Windows.h>
+﻿#include <Windows.h>
 #include <windowsx.h>
 #include <WinUser.h>
 #include "resource.h"
@@ -12,7 +11,9 @@
 #include "vthttp\vtapi.h"
 #include "virustotal\vtparse.h"
 #include "apkinfo\apkparse.h"
+#include "avtmail\avtparse.h"
 
+TCHAR title[20] = L"wlc-tool v0.1";											// 设置标题 
 
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void Dlg_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
@@ -29,8 +30,6 @@ HWND m_progress;
 TV_ITEM tvi = {0};
 TCHAR buf[256] = { 0 };
 HTREEITEM Selected;
-
-TCHAR title[20] = L"wlc-tool v0.1";											// 设置标题 
 
 //对应
 //1:SHA1/MD5/SHA256
@@ -451,6 +450,31 @@ void performActions(HWND hwnd)
 	}
 	break;
 	case 3:
+	{
+		//std::string strbuf;
+		//// 获得编辑器的行数;  
+		//int iCount = Edit_GetLineCount(editText);
+		//int index;
+		//for (index = 0; index < iCount; index++)
+		//{
+		//	memset(txContent, 0, MAX_PATH);
+		//	int iLength = Edit_GetLine(editText, index, txContent, MAX_PATH*iCount);
+		//	txContent[iLength] = '\0';
+		//	strbuf.append(WstringToString(txContent));
+		//}
+
+		//AvtParse* avtParse = new AvtParse();
+		//avtParse->readandparseJsonFromFile(strbuf.c_str(), MAX_PATH*iCount);
+
+		//m_tree = GetDlgItem(hwnd, IDC_DATASHOW);
+		//TreeView_DeleteAllItems(m_tree);
+		//InitTreeControl(avtParse);
+
+		//delete avtParse;
+		//SendMessage(m_progress, PBM_SETPOS, 100, 0L);
+		// 唤醒执行 按钮
+		EnableWindow(GetDlgItem(hwnd, IDOK), true);
+	}
 		break;
 	case 4:
 	{

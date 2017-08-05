@@ -155,6 +155,8 @@
     <ClCompile Include="apkinfo\apkparse.cpp" />
     <ClCompile Include="apkinfo\md5.cpp" />
     <ClCompile Include="apkinfo\sha1.cpp" />
+    <ClCompile Include="avtmail\avtinfo.cpp" />
+    <ClCompile Include="avtmail\avtparse.cpp" />
     <ClCompile Include="include\json_reader.cpp" />
     <ClCompile Include="include\json_value.cpp" />
     <ClCompile Include="include\json_writer.cpp" />
@@ -171,6 +173,8 @@
     <ClInclude Include="apkinfo\apkparse.h" />
     <ClInclude Include="apkinfo\md5.h" />
     <ClInclude Include="apkinfo\sha1.h" />
+    <ClInclude Include="avtmail\avtinfo.h" />
+    <ClInclude Include="avtmail\avtparse.h" />
     <ClInclude Include="FileFunction.h" />
     <ClInclude Include="include\curl\curl.h" />
     <ClInclude Include="include\curl\curlbuild.h" />

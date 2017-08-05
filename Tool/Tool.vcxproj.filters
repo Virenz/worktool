@@ -46,6 +46,12 @@
     <Filter Include="头文件\apkinfo">
       <UniqueIdentifier>{f28de465-a188-4364-b615-bb452a58ce3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\avtmail">
+      <UniqueIdentifier>{14512d60-ea34-4ddb-bcea-438e8dcd7670}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\avtmail">
+      <UniqueIdentifier>{284be371-b428-47a5-a7c3-1236e899c567}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -89,6 +95,12 @@
     </ClCompile>
     <ClCompile Include="apkinfo\apkparse.cpp">
       <Filter>源文件\apkinfo</Filter>
+    </ClCompile>
+    <ClCompile Include="avtmail\avtinfo.cpp">
+      <Filter>源文件\avtmail</Filter>
+    </ClCompile>
+    <ClCompile Include="avtmail\avtparse.cpp">
+      <Filter>源文件\avtmail</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +193,12 @@
     </ClInclude>
     <ClInclude Include="apkinfo\apkparse.h">
       <Filter>头文件\apkinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="avtmail\avtinfo.h">
+      <Filter>头文件\avtmail</Filter>
+    </ClInclude>
+    <ClInclude Include="avtmail\avtparse.h">
+      <Filter>头文件\avtmail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
